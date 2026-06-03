@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorteio de Nomes - Sem Repetição</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f0f4f8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px;
+            min-height: 100vh;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .input-area {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #34495e;
+            font-weight: bold;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-bottom: 15px;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        .btn-vermelho {
+            background-color: #e74c3c;
+        }
+
+        .btn-vermelho:hover {
+            background-color: #c0392b;
+        }
+
+        .resultado {
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            text-align: center;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .contagem {
+            font-size: 28px;
+            font-weight: bold;
+            color: #e67e22;
+        }
+
+        .nome-sorteado {
+            font-size: 22px;
+            font-weight: bold;
+            color: #27ae60;
+        }
+
+        .mensagem-final {
+            font-size: 20px;
+            font-weight: bold;
+            color: #8e44ad;
+            text-align: center;
+            padding: 15px;
+            background-color: #f3e5f5;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .lista-sorteados {
+            margin-top: 20px;
+        }
+
+        .lista-sorteados h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            color: #34495e;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎯 Sorteio de Nomes</h1>
+    <div class="container">
+        <div class="input-area">
+            <label for="nomes">Digite os nomes (um por linha):</label>
+            <textarea id="nomes" placeholder="Exemplo:
+Maria
+João
+Ana
+Pedro"></textarea>
+        </div>
+
+        <button id="sortearBtn" onclick="sortearNome()">Sortear Próximo Nome</button>
+        <button onclick="reiniciarSorteio()" class="btn-vermelho">Reiniciar Tudo</button>
+
+        <div class="mensagem-final" id="mensagemFinal" style="display: none;">
+            🎉 Todos os nomes foram sorteados! 🎉
+        </div>
+
+        <div class="resultado" id="resultado">
+            <p>Digite os nomes acima e clique em sortear</p>
+        </div>
+
+        <div class="lista-sorteados">
+            <h3>Nomes já sorteados:</h3>
+            <ul id="listaSorteados"></ul>
+        </div>
+    </div>
+
+    <script>
+        // Variáveis para controlar o sorteio
+        let listaNomes = [];
+        let nomesDisponiveis = [];
+        let sorteados = [];
+        let emContagem = false; // Controla se está acontecendo a contagem
+
+        // Sorteia um nome que ainda não foi sorteado - COM TIMER DE 3S
+        function sortearNome() {
+            if (emContagem) return; // Evita cliques durante a contagem
+
+            // Esconde mensagem final se aparecer
+            document.getElementById('mensagemFinal').style.display = 'none';
+
+            // Pega os nomes digitados sempre que clicar
+            const texto = document.getElementById('nomes').value.trim();
+            if (!texto) {
+                alert('Por favor, digite pelo menos um nome!');
+                return;
+            }
+
+            // Atualiza a lista de nomes com o que está escrito no momento
+            listaNomes = texto.split('\n')
+                .map(nome => nome.trim())
+                .filter(nome => nome !== '');
+
+            // Se for a primeira vez ou reiniciou, recria a lista de disponíveis
+            if (nomesDisponiveis.length === 0) {
+                nomesDisponiveis = [...listaNomes];
+                sorteados = [];
+            }
+
+            // Verifica se ainda tem nomes para sortear
+            if (nomesDisponiveis.length === 0) {
+                document.getElementById('resultado').innerHTML = '<p style="color:#e74c3c; font-weight:bold;">Nenhum nome disponível</p>';
+                document.getElementById('sortearBtn').disabled = true;
+                // Mostra mensagem que todos foram sorteados
+                document.getElementById('mensagemFinal').style.display = 'block';
+                return;
+            }
+
+            emContagem = true;
+            document.getElementById('sortearBtn').disabled = true; // Bloqueia novo clique durante contagem
+
+            let tempo = 3;
+            const resultadoEl = document.getElementById('resultado');
+            
+            // Mostra contagem regressiva
+            const contagemIntervalo = setInterval(() => {
+                resultadoEl.innerHTML = `<div class="contagem">${tempo}</div>`;
+                tempo--;
+
+                if (tempo < 0) {
+                    clearInterval(contagemIntervalo);
+                    // Realiza o sorteio após o tempo acabar
+                    realizarSorteioReal();
+                }
+            }, 1000);
+        }
+
+        // Função que realmente sorteia o nome
+        function realizarSorteioReal() {
+            // Sorteia um índice aleatório da lista de disponíveis
+            const indiceSorteado = Math.floor(Math.random() * nomesDisponiveis.length);
+            const nomeSorteado = nomesDisponiveis.splice(indiceSorteado, 1)[0];
+
+            // Adiciona à lista de sorteados
+            sorteados.push(nomeSorteado);
+
+            // Mostra o resultado
+            document.getElementById('resultado').innerHTML = `<div class="nome-sorteado">✨ ${nomeSorteado} ✨</div>`;
+            
+            // Atualiza a lista de já sorteados (ÚLTIMO PRIMEIRO)
+            atualizarListaSorteados();
+
+            emContagem = false;
+            
+            // Verifica se acabaram os nomes
+            if (nomesDisponiveis.length === 0) {
+                document.getElementById('sortearBtn').disabled = true;
+                document.getElementById('mensagemFinal').style.display = 'block';
+            } else {
+                document.getElementById('sortearBtn').disabled = false;
+            }
+        }
+
+        // Atualiza a visualização dos nomes já sorteados (ÚLTIMO SORTEADO APARECE PRIMEIRO)
+        function atualizarListaSorteados() {
+            const lista = document.getElementById('listaSorteados');
+            lista.innerHTML = '';
+
+            // Inverte a ordem para mostrar o último sorteado primeiro
+            const listaInvertida = [...sorteados].reverse();
+
+            listaInvertida.forEach((nome, posicao) => {
+                const item = document.createElement('li');
+                // Posição real na ordem do sorteio
+                const posicaoReal = sorteados.length - posicao;
+                item.textContent = `${posicaoReal}º - ${nome}`;
+                lista.appendChild(item);
+            });
+        }
+
+        // Reinicia todo o processo
+        function reiniciarSorteio() {
+            listaNomes = [];
+            nomesDisponiveis = [];
+            sorteados = [];
+            emContagem = false;
+            
+            document.getElementById('nomes').value = '';
+            document.getElementById('resultado').innerHTML = '<p>Digite os nomes acima e clique em sortear</p>';
+            document.getElementById('listaSorteados').innerHTML = '';
+            document.getElementById('mensagemFinal').style.display = 'none';
+            document.getElementById('sortearBtn').disabled = false;
+        }
+    </script>
+</body>
+</html>
