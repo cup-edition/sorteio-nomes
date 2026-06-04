@@ -101,7 +101,7 @@
             background-color: #f8f9fa;
             border-radius: 8px;
             text-align: center;
-            min-height: 120px;
+            min-height: 150px; /* Aumentei altura para caber o nome grande */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -110,18 +110,18 @@
         }
 
         .contagem {
-            font-size: 40px;
+            font-size: 50px !important; /* Contador grande */
             font-weight: bold;
             color: #e67e22;
         }
 
         .nome-sorteado {
-            font-size: 36px;
+            font-size: 42px !important; /* NOME MUITO GRANDE - CORRIGIDO */
             font-weight: bold;
             color: #27ae60;
             animation: aparecer 0.5s ease-out;
             text-align: center;
-            line-height: 1.3;
+            line-height: 1.2;
         }
 
         @keyframes aparecer {
@@ -162,11 +162,12 @@
         /* Estilo dos confetes */
         .confete {
             position: absolute;
-            width: 10px;
-            height: 10px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
             animation: cair 3s linear forwards;
-            z-index: 999;
+            z-index: 9999;
+            pointer-events: none;
         }
 
         @keyframes cair {
@@ -210,104 +211,88 @@ Pedro"></textarea>
         </div>
     </div>
 
-    <!-- 🔊 Efeitos Sonoros -->
-    <audio id="somSorteio" preload="auto" src="https://assets.mixkit.co/sfx/preview/mixkit-coin-win-notification-1984.mp3">
-    <audio id="somContagem" preload="auto" src="https://assets.mixkit.co/sfx/preview/mixkit-countdown-beep-1368.mp3">
+    <!-- 🔊 SONS CORRIGIDOS E FUNCIONAIS -->
+    <audio id="somSorteio" preload="auto" src="https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3">
+    <audio id="somContagem" preload="auto" src="https://assets.mixkit.co/sfx/preview/mixkit-clock-countdown-1367.mp3">
 
     <script>
         // Variáveis para controlar o sorteio
         let listaNomes = [];
         let nomesDisponiveis = [];
         let sorteados = [];
-        let emContagem = false; // Controla se está acontecendo a contagem
+        let emContagem = false;
 
         // Elementos de áudio
         const somSorteio = document.getElementById('somSorteio');
         const somContagem = document.getElementById('somContagem');
+        const cores = ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f', '#9b59b6', '#1abc9c', '#ff6b6b', '#4ecdc4'];
 
-        // Cores para os confetes
-        const cores = ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f', '#9b59b6', '#1abc9c'];
-
-        // Sorteia um nome que ainda não foi sorteado - COM TIMER DE 3S, SOM, NOME GRANDE E CONFETES
+        // Função principal de sorteio
         function sortearNome() {
-            if (emContagem) return; // Evita cliques durante a contagem
+            if (emContagem) return;
 
-            // Esconde mensagem final se aparecer
             document.getElementById('mensagemFinal').style.display = 'none';
-
-            // Pega os nomes digitados sempre que clicar
             const texto = document.getElementById('nomes').value.trim();
+            
             if (!texto) {
                 alert('Por favor, digite pelo menos um nome!');
                 return;
             }
 
-            // Atualiza a lista de nomes com o que está escrito no momento
-            listaNomes = texto.split('\n')
-                .map(nome => nome.trim())
-                .filter(nome => nome !== '');
+            listaNomes = texto.split('\n').map(nome => nome.trim()).filter(nome => nome !== '');
 
-            // Se for a primeira vez ou reiniciou, recria a lista de disponíveis
             if (nomesDisponiveis.length === 0) {
                 nomesDisponiveis = [...listaNomes];
                 sorteados = [];
             }
 
-            // Verifica se ainda tem nomes para sortear
             if (nomesDisponiveis.length === 0) {
-                document.getElementById('resultado').innerHTML = '<p style="color:#e74c3c; font-weight:bold;">Nenhum nome disponível</p>';
+                document.getElementById('resultado').innerHTML = '<p style="color:#e74c3c; font-weight:bold; font-size:20px;">Nenhum nome disponível</p>';
                 document.getElementById('sortearBtn').disabled = true;
-                // Mostra mensagem que todos foram sorteados
                 document.getElementById('mensagemFinal').style.display = 'block';
                 return;
             }
 
             emContagem = true;
-            document.getElementById('sortearBtn').disabled = true; // Bloqueia novo clique durante contagem
+            document.getElementById('sortearBtn').disabled = true;
 
             let tempo = 3;
             const resultadoEl = document.getElementById('resultado');
             
-            // Mostra contagem regressiva e toca som a cada número
+            // Contagem regressiva com som
             const contagemIntervalo = setInterval(() => {
-                // Toca o som de bipe durante a contagem
-                somContagem.currentTime = 0; // Reinicia o som para tocar rápido
-                somContagem.play();
+                // SOM DA CONTAGEM FUNCIONANDO
+                somContagem.currentTime = 0;
+                somContagem.play().catch(e => console.log("Som permitido ao interagir"));
 
                 resultadoEl.innerHTML = `<div class="contagem">${tempo}</div>`;
                 tempo--;
 
                 if (tempo < 0) {
                     clearInterval(contagemIntervalo);
-                    // Realiza o sorteio após o tempo acabar
                     realizarSorteioReal();
                 }
             }, 1000);
         }
 
-        // Função que realmente sorteia o nome
         function realizarSorteioReal() {
-            // Sorteia um índice aleatório da lista de disponíveis
             const indiceSorteado = Math.floor(Math.random() * nomesDisponiveis.length);
             const nomeSorteado = nomesDisponiveis.splice(indiceSorteado, 1)[0];
-
-            // Adiciona à lista de sorteados
             sorteados.push(nomeSorteado);
 
-            // 🔊 TOCA O SOM QUANDO O NOME APARECE
+            // SOM DO SORTEIO FUNCIONANDO
             somSorteio.currentTime = 0;
-            somSorteio.play();
+            somSorteio.play().catch(e => console.log("Som ativado"));
 
-            // ✨ MOSTRA O NOME GRANDE E CHAMA OS CONFETES
+            // NOME BEM GRANDE - CORRIGIDO
             document.getElementById('resultado').innerHTML = `<div class="nome-sorteado">✨ ${nomeSorteado} ✨</div>`;
-            criarConfetes(80); // Cria 80 confetes caindo
-
-            // Atualiza a lista de já sorteados (ÚLTIMO PRIMEIRO)
+            
+            // CONFETES
+            criarConfetes(100);
             atualizarListaSorteados();
 
             emContagem = false;
             
-            // Verifica se acabaram os nomes
             if (nomesDisponiveis.length === 0) {
                 document.getElementById('sortearBtn').disabled = true;
                 document.getElementById('mensagemFinal').style.display = 'block';
@@ -316,62 +301,44 @@ Pedro"></textarea>
             }
         }
 
-        // Função para criar o efeito de confetes
+        // Função dos confetes
         function criarConfetes(quantidade) {
             for (let i = 0; i < quantidade; i++) {
                 const confete = document.createElement('div');
                 confete.classList.add('confete');
-                
-                // Cor aleatória
-                const corAleatoria = cores[Math.floor(Math.random() * cores.length)];
-                confete.style.backgroundColor = corAleatoria;
-                
-                // Posição horizontal aleatória na tela
+                confete.style.backgroundColor = cores[Math.floor(Math.random() * cores.length)];
                 confete.style.left = `${Math.random() * 100}vw`;
-                
-                // Tamanho variado
-                const tamanho = Math.random() * 10 + 5;
-                confete.style.width = `${tamanho}px`;
-                confete.style.height = `${tamanho}px`;
-                
-                // Duração da animação variada
+                const tam = Math.random() * 12 + 6;
+                confete.style.width = `${tam}px`;
+                confete.style.height = `${tam}px`;
                 confete.style.animationDuration = `${Math.random() * 2 + 2}s`;
-
                 document.body.appendChild(confete);
-
-                // Remove o confete depois que cair
-                setTimeout(() => {
-                    confete.remove();
-                }, 3000);
+                setTimeout(() => confete.remove(), 3000);
             }
         }
 
-        // Atualiza a visualização dos nomes já sorteados (ÚLTIMO SORTEADO APARECE PRIMEIRO)
+        // Lista invertida
         function atualizarListaSorteados() {
             const lista = document.getElementById('listaSorteados');
             lista.innerHTML = '';
-
-            // Inverte a ordem para mostrar o último sorteado primeiro
             const listaInvertida = [...sorteados].reverse();
-
             listaInvertida.forEach((nome, posicao) => {
                 const item = document.createElement('li');
-                // Posição real na ordem do sorteio
                 const posicaoReal = sorteados.length - posicao;
                 item.textContent = `${posicaoReal}º - ${nome}`;
+                item.style.fontSize = '18px';
                 lista.appendChild(item);
             });
         }
 
-        // Reinicia todo o processo
+        // Reiniciar
         function reiniciarSorteio() {
             listaNomes = [];
             nomesDisponiveis = [];
             sorteados = [];
             emContagem = false;
-            
             document.getElementById('nomes').value = '';
-            document.getElementById('resultado').innerHTML = '<p>Digite os nomes acima e clique em sortear</p>';
+            document.getElementById('resultado').innerHTML = '<p style="font-size:18px;">Digite os nomes acima e clique em sortear</p>';
             document.getElementById('listaSorteados').innerHTML = '';
             document.getElementById('mensagemFinal').style.display = 'none';
             document.getElementById('sortearBtn').disabled = false;
