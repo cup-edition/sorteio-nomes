@@ -19,6 +19,7 @@
             align-items: center;
             padding: 30px;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
         h1 {
@@ -34,6 +35,8 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             width: 100%;
             max-width: 500px;
+            position: relative;
+            z-index: 1;
         }
 
         .input-area {
@@ -94,27 +97,36 @@
         }
 
         .resultado {
-            padding: 20px;
+            padding: 30px 20px;
             background-color: #f8f9fa;
             border-radius: 8px;
             text-align: center;
-            min-height: 80px;
+            min-height: 120px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 15px;
+            overflow: hidden;
         }
 
         .contagem {
-            font-size: 28px;
+            font-size: 40px;
             font-weight: bold;
             color: #e67e22;
         }
 
         .nome-sorteado {
-            font-size: 22px;
+            font-size: 36px;
             font-weight: bold;
             color: #27ae60;
+            animation: aparecer 0.5s ease-out;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        @keyframes aparecer {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
         }
 
         .mensagem-final {
@@ -145,6 +157,27 @@
             padding: 8px 0;
             border-bottom: 1px solid #eee;
             color: #34495e;
+        }
+
+        /* Estilo dos confetes */
+        .confete {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: cair 3s linear forwards;
+            z-index: 999;
+        }
+
+        @keyframes cair {
+            0% {
+                transform: translateY(-10px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
         }
     </style>
 </head>
@@ -177,7 +210,7 @@ Pedro"></textarea>
         </div>
     </div>
 
-    <!-- 🔊 Efeito Sonoro -->
+    <!-- 🔊 Efeitos Sonoros -->
     <audio id="somSorteio" preload="auto" src="https://assets.mixkit.co/sfx/preview/mixkit-coin-win-notification-1984.mp3">
     <audio id="somContagem" preload="auto" src="https://assets.mixkit.co/sfx/preview/mixkit-countdown-beep-1368.mp3">
 
@@ -192,7 +225,10 @@ Pedro"></textarea>
         const somSorteio = document.getElementById('somSorteio');
         const somContagem = document.getElementById('somContagem');
 
-        // Sorteia um nome que ainda não foi sorteado - COM TIMER DE 3S E SOM
+        // Cores para os confetes
+        const cores = ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f', '#9b59b6', '#1abc9c'];
+
+        // Sorteia um nome que ainda não foi sorteado - COM TIMER DE 3S, SOM, NOME GRANDE E CONFETES
         function sortearNome() {
             if (emContagem) return; // Evita cliques durante a contagem
 
@@ -262,9 +298,10 @@ Pedro"></textarea>
             somSorteio.currentTime = 0;
             somSorteio.play();
 
-            // Mostra o resultado
+            // ✨ MOSTRA O NOME GRANDE E CHAMA OS CONFETES
             document.getElementById('resultado').innerHTML = `<div class="nome-sorteado">✨ ${nomeSorteado} ✨</div>`;
-            
+            criarConfetes(80); // Cria 80 confetes caindo
+
             // Atualiza a lista de já sorteados (ÚLTIMO PRIMEIRO)
             atualizarListaSorteados();
 
@@ -276,6 +313,36 @@ Pedro"></textarea>
                 document.getElementById('mensagemFinal').style.display = 'block';
             } else {
                 document.getElementById('sortearBtn').disabled = false;
+            }
+        }
+
+        // Função para criar o efeito de confetes
+        function criarConfetes(quantidade) {
+            for (let i = 0; i < quantidade; i++) {
+                const confete = document.createElement('div');
+                confete.classList.add('confete');
+                
+                // Cor aleatória
+                const corAleatoria = cores[Math.floor(Math.random() * cores.length)];
+                confete.style.backgroundColor = corAleatoria;
+                
+                // Posição horizontal aleatória na tela
+                confete.style.left = `${Math.random() * 100}vw`;
+                
+                // Tamanho variado
+                const tamanho = Math.random() * 10 + 5;
+                confete.style.width = `${tamanho}px`;
+                confete.style.height = `${tamanho}px`;
+                
+                // Duração da animação variada
+                confete.style.animationDuration = `${Math.random() * 2 + 2}s`;
+
+                document.body.appendChild(confete);
+
+                // Remove o confete depois que cair
+                setTimeout(() => {
+                    confete.remove();
+                }, 3000);
             }
         }
 
