@@ -12,8 +12,9 @@
             font-family: Arial, sans-serif;
         }
 
+        /* FUNDO ALTERADO PARA CINZA ESCURO */
         body {
-            background-color: #f0f4f8;
+            background-color: #343a40;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -23,16 +24,16 @@
         }
 
         h1 {
-            color: #2c3e50;
+            color: #f8f9fa; /* Cor clara para contrastar com fundo escuro */
             margin-bottom: 25px;
             text-align: center;
         }
 
         .container {
-            background-color: white;
+            background-color: #495057; /* Cinza um pouco mais claro que o fundo */
             padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             width: 100%;
             max-width: 500px;
             position: relative;
@@ -46,13 +47,13 @@
         label {
             display: block;
             margin-bottom: 8px;
-            color: #34495e;
+            color: #f8f9fa; /* Texto claro */
             font-weight: bold;
         }
 
         .contador-nomes {
             font-size: 15px;
-            color: #7f8c8d;
+            color: #ced4da;
             margin-top: 5px;
             margin-bottom: 10px;
             font-style: italic;
@@ -62,10 +63,12 @@
             width: 100%;
             height: 120px;
             padding: 12px;
-            border: 2px solid #ddd;
+            border: 2px solid #6c757d;
             border-radius: 8px;
             font-size: 16px;
             resize: vertical;
+            background-color: #212529;
+            color: #f8f9fa;
         }
 
         textarea:focus {
@@ -92,7 +95,7 @@
         }
 
         button:disabled {
-            background-color: #bdc3c7;
+            background-color: #6c757d;
             cursor: not-allowed;
         }
 
@@ -107,17 +110,17 @@
         .info-sorteio {
             display: flex;
             justify-content: space-between;
-            background-color: #eaf2f8;
+            background-color: #212529;
             padding: 10px;
             border-radius: 8px;
             margin-bottom: 15px;
             font-weight: bold;
-            color: #2980b9;
+            color: #3498db;
         }
 
         .resultado {
             padding: 30px 20px;
-            background-color: #f8f9fa;
+            background-color: #212529;
             border-radius: 8px;
             text-align: center;
             min-height: 150px;
@@ -151,10 +154,10 @@
         .mensagem-final {
             font-size: 20px;
             font-weight: bold;
-            color: #8e44ad;
+            color: #d6bcfa;
             text-align: center;
             padding: 15px;
-            background-color: #f3e5f5;
+            background-color: #4a3b57;
             border-radius: 8px;
             margin-bottom: 15px;
         }
@@ -164,7 +167,7 @@
         }
 
         .lista-sorteados h3 {
-            color: #2c3e50;
+            color: #f8f9fa;
             margin-bottom: 10px;
         }
 
@@ -174,8 +177,8 @@
 
         li {
             padding: 8px 0;
-            border-bottom: 1px solid #eee;
-            color: #34495e;
+            border-bottom: 1px solid #6c757d;
+            color: #f8f9fa;
             font-size: 18px;
         }
 
@@ -223,7 +226,7 @@ Pedro" oninput="atualizarContadorNomes()"></textarea>
         </div>
 
         <div class="resultado" id="resultado">
-            <p style="font-size:18px;">Digite os nomes acima e clique em sortear</p>
+            <p style="font-size:18px; color:#ced4da;">Digite os nomes acima e clique em sortear</p>
         </div>
 
         <div class="lista-sorteados">
@@ -371,7 +374,7 @@ Pedro" oninput="atualizarContadorNomes()"></textarea>
             emContagem = false;
             document.getElementById('nomes').value = '';
             document.getElementById('totalNomes').textContent = '0';
-            document.getElementById('resultado').innerHTML = '<p style="font-size:18px;">Digite os nomes acima e clique em sortear</p>';
+            document.getElementById('resultado').innerHTML = '<p style="font-size:18px; color:#ced4da;">Digite os nomes acima e clique em sortear</p>';
             document.getElementById('listaSorteados').innerHTML = '';
             document.getElementById('mensagemFinal').style.display = 'none';
             document.getElementById('sortearBtn').disabled = false;
