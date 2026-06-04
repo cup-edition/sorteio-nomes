@@ -177,6 +177,10 @@ Pedro"></textarea>
         </div>
     </div>
 
+    <!-- 🔊 Efeito Sonoro -->
+    <audio id="somSorteio" preload="auto" src="https://assets.mixkit.co/sfx/preview/mixkit-coin-win-notification-1984.mp3">
+    <audio id="somContagem" preload="auto" src="https://assets.mixkit.co/sfx/preview/mixkit-countdown-beep-1368.mp3">
+
     <script>
         // Variáveis para controlar o sorteio
         let listaNomes = [];
@@ -184,7 +188,11 @@ Pedro"></textarea>
         let sorteados = [];
         let emContagem = false; // Controla se está acontecendo a contagem
 
-        // Sorteia um nome que ainda não foi sorteado - COM TIMER DE 3S
+        // Elementos de áudio
+        const somSorteio = document.getElementById('somSorteio');
+        const somContagem = document.getElementById('somContagem');
+
+        // Sorteia um nome que ainda não foi sorteado - COM TIMER DE 3S E SOM
         function sortearNome() {
             if (emContagem) return; // Evita cliques durante a contagem
 
@@ -224,8 +232,12 @@ Pedro"></textarea>
             let tempo = 3;
             const resultadoEl = document.getElementById('resultado');
             
-            // Mostra contagem regressiva
+            // Mostra contagem regressiva e toca som a cada número
             const contagemIntervalo = setInterval(() => {
+                // Toca o som de bipe durante a contagem
+                somContagem.currentTime = 0; // Reinicia o som para tocar rápido
+                somContagem.play();
+
                 resultadoEl.innerHTML = `<div class="contagem">${tempo}</div>`;
                 tempo--;
 
@@ -245,6 +257,10 @@ Pedro"></textarea>
 
             // Adiciona à lista de sorteados
             sorteados.push(nomeSorteado);
+
+            // 🔊 TOCA O SOM QUANDO O NOME APARECE
+            somSorteio.currentTime = 0;
+            somSorteio.play();
 
             // Mostra o resultado
             document.getElementById('resultado').innerHTML = `<div class="nome-sorteado">✨ ${nomeSorteado} ✨</div>`;
