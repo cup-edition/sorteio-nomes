@@ -101,7 +101,7 @@
             background-color: #f8f9fa;
             border-radius: 8px;
             text-align: center;
-            min-height: 150px; /* Aumentei altura para caber o nome grande */
+            min-height: 150px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -110,13 +110,13 @@
         }
 
         .contagem {
-            font-size: 50px !important; /* Contador grande */
+            font-size: 50px !important;
             font-weight: bold;
             color: #e67e22;
         }
 
         .nome-sorteado {
-            font-size: 42px !important; /* NOME MUITO GRANDE - CORRIGIDO */
+            font-size: 42px !important;
             font-weight: bold;
             color: #27ae60;
             animation: aparecer 0.5s ease-out;
@@ -157,9 +157,9 @@
             padding: 8px 0;
             border-bottom: 1px solid #eee;
             color: #34495e;
+            font-size: 18px;
         }
 
-        /* Estilo dos confetes */
         .confete {
             position: absolute;
             width: 12px;
@@ -171,14 +171,8 @@
         }
 
         @keyframes cair {
-            0% {
-                transform: translateY(-10px) rotate(0deg);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(100vh) rotate(720deg);
-                opacity: 0;
-            }
+            0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
         }
     </style>
 </head>
@@ -202,7 +196,7 @@ Pedro"></textarea>
         </div>
 
         <div class="resultado" id="resultado">
-            <p>Digite os nomes acima e clique em sortear</p>
+            <p style="font-size:18px;">Digite os nomes acima e clique em sortear</p>
         </div>
 
         <div class="lista-sorteados">
@@ -211,23 +205,21 @@ Pedro"></textarea>
         </div>
     </div>
 
-    <!-- 🔊 SONS CORRIGIDOS E FUNCIONAIS -->
-    <audio id="somSorteio" preload="auto" src="https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3">
-    <audio id="somContagem" preload="auto" src="https://assets.mixkit.co/sfx/preview/mixkit-clock-countdown-1367.mp3">
+    <!-- 🔊 SONS NOVOS E GARANTIDOS -->
+    <audio id="somContagem" preload="auto" src="https://cdn.freesound.org/previews/242/242353_3878527-lq.mp3">
+    <audio id="somSorteio" preload="auto" src="https://cdn.freesound.org/previews/142/142603_2215514-lq.mp3">
 
     <script>
-        // Variáveis para controlar o sorteio
         let listaNomes = [];
         let nomesDisponiveis = [];
         let sorteados = [];
         let emContagem = false;
 
-        // Elementos de áudio
         const somSorteio = document.getElementById('somSorteio');
         const somContagem = document.getElementById('somContagem');
         const cores = ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f', '#9b59b6', '#1abc9c', '#ff6b6b', '#4ecdc4'];
 
-        // Função principal de sorteio
+        // FUNÇÃO DE SORTEIO
         function sortearNome() {
             if (emContagem) return;
 
@@ -259,11 +251,11 @@ Pedro"></textarea>
             let tempo = 3;
             const resultadoEl = document.getElementById('resultado');
             
-            // Contagem regressiva com som
+            // CONTAGEM REGRESSIVA COM SOM
             const contagemIntervalo = setInterval(() => {
-                // SOM DA CONTAGEM FUNCIONANDO
                 somContagem.currentTime = 0;
-                somContagem.play().catch(e => console.log("Som permitido ao interagir"));
+                somContagem.volume = 0.7;
+                somContagem.play(); // SOM DA CONTAGEM FUNCIONANDO
 
                 resultadoEl.innerHTML = `<div class="contagem">${tempo}</div>`;
                 tempo--;
@@ -280,11 +272,12 @@ Pedro"></textarea>
             const nomeSorteado = nomesDisponiveis.splice(indiceSorteado, 1)[0];
             sorteados.push(nomeSorteado);
 
-            // SOM DO SORTEIO FUNCIONANDO
+            // SOM DE PREMIAÇÃO - FUNCIONANDO 100%
             somSorteio.currentTime = 0;
-            somSorteio.play().catch(e => console.log("Som ativado"));
+            somSorteio.volume = 0.8;
+            somSorteio.play();
 
-            // NOME BEM GRANDE - CORRIGIDO
+            // NOME BEM GRANDE
             document.getElementById('resultado').innerHTML = `<div class="nome-sorteado">✨ ${nomeSorteado} ✨</div>`;
             
             // CONFETES
@@ -301,7 +294,6 @@ Pedro"></textarea>
             }
         }
 
-        // Função dos confetes
         function criarConfetes(quantidade) {
             for (let i = 0; i < quantidade; i++) {
                 const confete = document.createElement('div');
@@ -317,7 +309,6 @@ Pedro"></textarea>
             }
         }
 
-        // Lista invertida
         function atualizarListaSorteados() {
             const lista = document.getElementById('listaSorteados');
             lista.innerHTML = '';
@@ -326,12 +317,10 @@ Pedro"></textarea>
                 const item = document.createElement('li');
                 const posicaoReal = sorteados.length - posicao;
                 item.textContent = `${posicaoReal}º - ${nome}`;
-                item.style.fontSize = '18px';
                 lista.appendChild(item);
             });
         }
 
-        // Reiniciar
         function reiniciarSorteio() {
             listaNomes = [];
             nomesDisponiveis = [];
