@@ -153,7 +153,7 @@
             flex-wrap: wrap;
         }
 
-        /* ✅ FOTO AUMENTADA MAIS UM POUCO (DE 4em PARA 4.8em) - BORDA FINA MANTIDA */
+        /* ✅ FOTO NO TAMANHO DE 4.8em, BORDA FINA MANTIDA */
         .foto-sorteado {
             width: 4.8em;
             height: 4.8em;
@@ -334,11 +334,14 @@
                     .map(inscrito => {
                         return {
                             nome: inscrito.nome,
-                            foto: inscrito.foto || 'https://via.placeholder.com/180?text=Sem+Foto' // Foto padrão se não tiver
+                            foto: inscrito.foto || 'https://via.placeholder.com/180?text=Sem+Foto'
                         };
                     });
 
-                // ✅ ATUALIZA A CAIXA DE TEXTO AUTOMATICAMENTE (APENAS PARA VISUALIZAÇÃO)
+                // ✅ ORDENA: ÚLTIMOS A CONFIRMAR FICAM NO TOPO
+                listaParticipantes = listaParticipantes.reverse();
+
+                // ✅ ATUALIZA A CAIXA DE TEXTO JÁ ORDENADA
                 const textarea = document.getElementById('nomes');
                 if (listaParticipantes.length > 0) {
                     const nomesTexto = listaParticipantes.map(p => p.nome).join('\n');
@@ -360,18 +363,17 @@
                 document.getElementById('sortearBtn').disabled = (listaParticipantes.length === 0);
             });
             
-            // ✅ ADICIONA SUPORTE À TECLA ESPAÇO
+            // ✅ TECLA ESPAÇO: SÓ FUNCIONA SE HOUVER DISPONÍVEIS E NÃO ESTIVER SORTEANDO
             document.addEventListener('keydown', function(event) {
-                if (event.code === 'Space' || event.key === ' ') {
-                    event.preventDefault(); // Evita rolar a página
-                    sortearNome(); // Chama a função de sorteio
+                if ((event.code === 'Space' || event.key === ' ') && participantesDisponiveis.length > 0 && !emContagem) {
+                    event.preventDefault();
+                    sortearNome();
                 }
             });
         };
 
         // ✅ FUNÇÃO AUXILIAR PARA COMPARAR LISTAS
         function verificarListasIguais(lista1, lista2) {
-            // Compara só os nomes para ver se a lista mudou
             const nomes1 = lista1.map(p => p.nome).sort();
             const nomes2 = lista2.map(p => p.nome).sort();
             return JSON.stringify(nomes1) === JSON.stringify(nomes2);
@@ -385,23 +387,9 @@
 
         // FUNÇÃO DE SORTEIO
         function sortearNome() {
-            if (emContagem || listaParticipantes.length === 0) return;
+            if (emContagem || listaParticipantes.length === 0 || participantesDisponiveis.length === 0) return;
 
             document.getElementById('mensagemFinal').style.display = 'none';
-
-            if (participantesDisponiveis.length === 0) {
-                participantesDisponiveis = [...listaParticipantes];
-                sorteados = [];
-                atualizarInfoSorteio();
-            }
-
-            if (participantesDisponiveis.length === 0) {
-                document.getElementById('resultado').innerHTML = '<p style="color:#e74c3c; font-weight:bold; font-size:20px;">Nenhum nome disponível</p>';
-                document.getElementById('sortearBtn').disabled = true;
-                document.getElementById('mensagemFinal').style.display = 'block';
-                atualizarInfoSorteio();
-                return;
-            }
 
             emContagem = true;
             document.getElementById('sortearBtn').disabled = true;
@@ -450,6 +438,7 @@
 
             emContagem = false;
             
+            // ✅ QUANDO ACABAR, BLOQUEIA TUDO (TECLA ESPAÇO JÁ ESTÁ BLOQUEADA PELA CONDIÇÃO)
             if (participantesDisponiveis.length === 0) {
                 document.getElementById('sortearBtn').disabled = true;
                 document.getElementById('mensagemFinal').style.display = 'block';
@@ -489,7 +478,7 @@
         }
 
         function reiniciarSorteio() {
-            // ✅ AO REINICIAR, PEGA SEMPRE A LISTA MAIS RECENTE DO BANCO
+            // ✅ AO REINICIAR, PEGA SEMPRE A LISTA MAIS RECENTE E JÁ ORDENADA
             db.ref('inscricoes').once('value', snapshot => {
                 const todasInscricoes = snapshot.val() || [];
                 listaParticipantes = todasInscricoes
@@ -500,6 +489,9 @@
                             foto: inscrito.foto || 'https://via.placeholder.com/180?text=Sem+Foto'
                         };
                     });
+
+                // ✅ MANTÉM A ORDEM: ÚLTIMOS NO TOPO
+                listaParticipantes = listaParticipantes.reverse();
 
                 participantesDisponiveis = [...listaParticipantes];
                 sorteados = [];
