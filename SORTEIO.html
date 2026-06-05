@@ -307,32 +307,38 @@
         const cores = ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f', '#9b59b6', '#1abc9c', '#ff6b6b', '#4ecdc4'];
 
         window.onload = function() {
-            // ✅ AGORA VAMOS PEGAR OS DADOS E ORDENAR PELA CHAVE DE CRIAÇÃO DO FIREBASE
-            // ✅ CHAVE DO FIREBASE É SEMPRE CRESCENTE: QUANTO MAIOR A CHAVE, MAIS NOVO É O CADASTRO
+            // ✅ AGORA VAMOS PEGAR NA ORDEM QUE O FIREBASE SALVA, MAS INVERTENDO PARA FICAR IGUAL AO PAINEL
+            // ✅ O PAINEL MOSTRA ÚLTIMO CONFIRMADO NO TOPO, ENTÃO VAMOS PEGAR DO FIM PARA O INÍCIO
             db.ref('inscricoes').on('value', function(snapshot) {
-                // Pega todos os itens com sua chave original
-                let listaComChaves = [];
+                const todasInscricoes = [];
+                
+                // 1. Pega todos os itens na ordem original do banco
                 snapshot.forEach(item => {
-                    listaComChaves.push({
-                        dados: item.val(),
-                        chave: item.key // essa chave é única e crescente por ordem de criação
-                    });
+                    todasInscricoes.push(item.val());
                 });
 
-                // ✅ ORDENA DO MAIS NOVO PARA O MAIS ANTIGO: chave maior = mais novo
-                listaComChaves.sort((a, b) => b.chave.localeCompare(a.chave));
+                // 2. ✅ INVERTE A ORDEM: AGORA O ÚLTIMO CONFIRMADO VAI PARA O TOPO
+                todasInscricoes.reverse();
 
-                // ✅ AGORA PEGA SÓ OS DADOS, JÁ NA ORDEM CERTA
-                listaParticipantes = listaComChaves
-                    .filter(item => item.dados && item.dados.status === 'confirmado')
-                    .map(item => {
+                // 3. Filtra só os confirmados, mantendo essa ordem
+                listaParticipantes = todasInscricoes
+                    .filter(inscrito => inscrito && inscrito.status === 'confirmado')
+                    .map(inscrito => {
                         return {
-                            nome: item.dados.nome,
-                            foto: item.dados.foto || 'https://via.placeholder.com/180?text=Sem+Foto'
+                            nome: inscrito.nome,
+                            foto: inscrito.foto || 'https://via.placeholder.com/180?text=Sem+Foto'
                         };
                     });
 
-                // ✅ AGORA A ORDEM É: ZUPERBLAHQ_ → DAVI → CLEITON → BARRIGA → ENDRIL → ÍNDIO
+                // ✅ PRONTO: AGORA A ORDEM É IGUAL AO SEU PAINEL ADMINISTRATIVO
+                // Exemplo:
+                // ZUPERBLAHQ_ (último confirmado)
+                // DAVI
+                // CLEITON
+                // BARRIGA
+                // ENDRIL
+                // ÍNDIO (primeiro confirmado, embaixo)
+
                 const textarea = document.getElementById('nomes');
                 if (listaParticipantes.length > 0) {
                     const nomesTexto = listaParticipantes.map(p => p.nome).join('\n');
@@ -458,22 +464,17 @@
 
         function reiniciarSorteio() {
             db.ref('inscricoes').once('value', snapshot => {
-                let listaComChaves = [];
-                snapshot.forEach(item => {
-                    listaComChaves.push({
-                        dados: item.val(),
-                        chave: item.key
-                    });
-                });
-
-                // ✅ ORDENA SEMPRE DO MAIS NOVO PARA O MAIS ANTIGO
-                listaComChaves.sort((a, b) => b.chave.localeCompare(a.chave));
+                const todasInscricoes = [];
+                snapshot.forEach(item => todasInscricoes.push(item.val()));
                 
-                listaParticipantes = listaComChaves
-                    .filter(item => item.dados && item.dados.status === 'confirmado')
-                    .map(item => ({
-                        nome: item.dados.nome,
-                        foto: item.dados.foto || 'https://via.placeholder.com/180?text=Sem+Foto'
+                // ✅ SEMPRE INVERTE PARA FICAR IGUAL AO PAINEL
+                todasInscricoes.reverse();
+                
+                listaParticipantes = todasInscricoes
+                    .filter(inscrito => inscrito && inscrito.status === 'confirmado')
+                    .map(inscrito => ({
+                        nome: inscrito.nome,
+                        foto: inscrito.foto || 'https://via.placeholder.com/180?text=Sem+Foto'
                     }));
 
                 participantesDisponiveis = [...listaParticipantes];
