@@ -46,7 +46,7 @@
         }
 
         label {
-            display: block;
+            display: block: block;
             margin-bottom: 8px;
             color: #f8f9fa;
             font-weight: bold;
@@ -297,8 +297,8 @@
         }
         var db = firebase.database();
 
-        let listaParticipantes = [];
-        let participantesDisponiveis = [];
+        let listaOriginal = []; // lista completa, sempre em ordem alfabética
+        let participantesDisponiveis = []; // lista que vai diminuindo ao sortear
         let sorteados = [];
         let emContagem = false;
 
@@ -307,56 +307,31 @@
         const cores = ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f', '#9b59b6', '#1abc9c', '#ff6b6b', '#4ecdc4'];
 
         window.onload = function() {
-            // ✅ AGORA VAMOS PEGAR NA ORDEM QUE O FIREBASE SALVA, MAS INVERTENDO PARA FICAR IGUAL AO PAINEL
-            // ✅ O PAINEL MOSTRA ÚLTIMO CONFIRMADO NO TOPO, ENTÃO VAMOS PEGAR DO FIM PARA O INÍCIO
             db.ref('inscricoes').on('value', function(snapshot) {
                 const todasInscricoes = [];
-                
-                // 1. Pega todos os itens na ordem original do banco
-                snapshot.forEach(item => {
-                    todasInscricoes.push(item.val());
-                });
+                snapshot.forEach(item => todasInscricoes.push(item.val()));
 
-                // 2. ✅ INVERTE A ORDEM: AGORA O ÚLTIMO CONFIRMADO VAI PARA O TOPO
-                todasInscricoes.reverse();
-
-                // 3. Filtra só os confirmados, mantendo essa ordem
-                listaParticipantes = todasInscricoes
+                // ✅ FILTRA SÓ CONFIRMADOS E ORDENA POR ORDEM ALFABÉTICA
+                listaOriginal = todasInscricoes
                     .filter(inscrito => inscrito && inscrito.status === 'confirmado')
-                    .map(inscrito => {
-                        return {
-                            nome: inscrito.nome,
-                            foto: inscrito.foto || 'https://via.placeholder.com/180?text=Sem+Foto'
-                        };
-                    });
+                    .map(inscrito => ({
+                        nome: inscrito.nome,
+                        foto: inscrito.foto || 'https://via.placeholder.com/180?text=Sem+Foto'
+                    }))
+                    .sort((a, b) => a.nome.localeCompare(b.nome)); // ✅ ORDEM ALFABÉTICA
 
-                // ✅ PRONTO: AGORA A ORDEM É IGUAL AO SEU PAINEL ADMINISTRATIVO
-                // Exemplo:
-                // ZUPERBLAHQ_ (último confirmado)
-                // DAVI
-                // CLEITON
-                // BARRIGA
-                // ENDRIL
-                // ÍNDIO (primeiro confirmado, embaixo)
-
-                const textarea = document.getElementById('nomes');
-                if (listaParticipantes.length > 0) {
-                    const nomesTexto = listaParticipantes.map(p => p.nome).join('\n');
-                    textarea.value = nomesTexto;
-                } else {
-                    textarea.value = 'Nenhum inscrito confirmado no momento';
+                // ✅ SÓ ATUALIZA A LISTA DISPONÍVEL SE ESTIVER VAZIA (PARA NÃO PERDER OS JÁ SORTEADOS)
+                if (participantesDisponiveis.length === 0) {
+                    participantesDisponiveis = [...listaOriginal];
                 }
 
-                document.getElementById('totalNomes').textContent = listaParticipantes.length;
-
-                if (participantesDisponiveis.length === 0 || !verificarListasIguais(participantesDisponiveis, listaParticipantes)) {
-                    participantesDisponiveis = [...listaParticipantes];
-                    atualizarInfoSorteio();
-                }
-
-                document.getElementById('sortearBtn').disabled = (listaParticipantes.length === 0);
+                atualizarCaixaNomes();
+                document.getElementById('totalNomes').textContent = listaOriginal.length;
+                atualizarInfoSorteio();
+                document.getElementById('sortearBtn').disabled = (listaOriginal.length === 0);
             });
             
+            // ✅ TECLA ESPAÇO SÓ FUNCIONA SE TIVER NOMES DISPONÍVEIS
             document.addEventListener('keydown', function(event) {
                 if ((event.code === 'Space' || event.key === ' ') && participantesDisponiveis.length > 0 && !emContagem) {
                     event.preventDefault();
@@ -365,10 +340,15 @@
             });
         };
 
-        function verificarListasIguais(lista1, lista2) {
-            const nomes1 = lista1.map(p => p.nome).sort();
-            const nomes2 = lista2.map(p => p.nome).sort();
-            return JSON.stringify(nomes1) === JSON.stringify(nomes2);
+        // ✅ ATUALIZA A CAIXA MOSTRANDO SÓ OS QUE AINDA NÃO FORAM SORTEADOS
+        function atualizarCaixaNomes() {
+            const textarea = document.getElementById('nomes');
+            if (participantesDisponiveis.length > 0) {
+                const nomesTexto = participantesDisponiveis.map(p => p.nome).join('\n');
+                textarea.value = nomesTexto;
+            } else {
+                textarea.value = 'Todos já foram sorteados';
+            }
         }
 
         function atualizarInfoSorteio() {
@@ -377,10 +357,9 @@
         }
 
         function sortearNome() {
-            if (emContagem || listaParticipantes.length === 0 || participantesDisponiveis.length === 0) return;
+            if (emContagem || participantesDisponiveis.length === 0) return;
 
             document.getElementById('mensagemFinal').style.display = 'none';
-
             emContagem = true;
             document.getElementById('sortearBtn').disabled = true;
 
@@ -391,10 +370,8 @@
                 somContagem.currentTime = 0;
                 somContagem.volume = 0.7;
                 somContagem.play();
-
                 resultadoEl.innerHTML = `<div class="contagem">${tempo}</div>`;
                 tempo--;
-
                 if (tempo < 0) {
                     clearInterval(contagemIntervalo);
                     realizarSorteioReal();
@@ -403,6 +380,7 @@
         }
 
         function realizarSorteioReal() {
+            // ✅ SORTEIA E REMOVE DA LISTA DISPONÍVEL
             const indiceSorteado = Math.floor(Math.random() * participantesDisponiveis.length);
             const participanteSorteado = participantesDisponiveis.splice(indiceSorteado, 1)[0];
             sorteados.push(participanteSorteado);
@@ -419,11 +397,13 @@
             `;
             
             criarConfetes(100);
+            atualizarCaixaNomes(); // ✅ ATUALIZA CAIXA, REMOVENDO O SORTEADO
             atualizarListaSorteados();
             atualizarInfoSorteio();
 
             emContagem = false;
             
+            // ✅ SE ACABAREM OS NOMES, BLOQUEIA TUDO
             if (participantesDisponiveis.length === 0) {
                 document.getElementById('sortearBtn').disabled = true;
                 document.getElementById('mensagemFinal').style.display = 'block';
@@ -462,31 +442,18 @@
             });
         }
 
+        // ✅ SÓ AQUI VOLTA TUDO AO NORMAL
         function reiniciarSorteio() {
-            db.ref('inscricoes').once('value', snapshot => {
-                const todasInscricoes = [];
-                snapshot.forEach(item => todasInscricoes.push(item.val()));
-                
-                // ✅ SEMPRE INVERTE PARA FICAR IGUAL AO PAINEL
-                todasInscricoes.reverse();
-                
-                listaParticipantes = todasInscricoes
-                    .filter(inscrito => inscrito && inscrito.status === 'confirmado')
-                    .map(inscrito => ({
-                        nome: inscrito.nome,
-                        foto: inscrito.foto || 'https://via.placeholder.com/180?text=Sem+Foto'
-                    }));
-
-                participantesDisponiveis = [...listaParticipantes];
-                sorteados = [];
-                emContagem = false;
-                
-                document.getElementById('resultado').innerHTML = '<p style="font-size:18px; color:#ced4da;">Pronto para novo sorteio!</p>';
-                document.getElementById('listaSorteados').innerHTML = '';
-                document.getElementById('mensagemFinal').style.display = 'none';
-                document.getElementById('sortearBtn').disabled = (listaParticipantes.length === 0);
-                atualizarInfoSorteio();
-            });
+            participantesDisponiveis = [...listaOriginal]; // ✅ VOLTA A LISTA COMPLETA
+            sorteados = [];
+            emContagem = false;
+            
+            atualizarCaixaNomes();
+            document.getElementById('resultado').innerHTML = '<p style="font-size:18px; color:#ced4da;">Pronto para novo sorteio!</p>';
+            document.getElementById('listaSorteados').innerHTML = '';
+            document.getElementById('mensagemFinal').style.display = 'none';
+            document.getElementById('sortearBtn').disabled = (listaOriginal.length === 0);
+            atualizarInfoSorteio();
         }
     </script>
 </body>
