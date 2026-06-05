@@ -239,7 +239,8 @@
             <div>Faltam: <span id="quantidadeFaltam">0</span></div>
         </div>
 
-        <button id="sortearBtn" onclick="sortearNome()">Sortear Próximo Nome</button>
+        <!-- ✅ NOME DO BOTÃO ALTERADO PARA "SORTEAR" -->
+        <button id="sortearBtn" onclick="sortearNome()">SORTEAR</button>
         <button onclick="reiniciarSorteio()" class="btn-vermelho">Reiniciar Tudo</button>
 
         <div class="mensagem-final" id="mensagemFinal" style="display: none;">
@@ -317,6 +318,14 @@
 
                 // ✅ LIBERA OU BLOQUEIA O BOTÃO
                 document.getElementById('sortearBtn').disabled = (nomesConfirmados.length === 0);
+            });
+            
+            // ✅ ADICIONA SUPORTE À TECLA ESPAÇO
+            document.addEventListener('keydown', function(event) {
+                if (event.code === 'Space' || event.key === ' ') {
+                    event.preventDefault(); // Evita rolar a página
+                    sortearNome(); // Chama a função de sorteio
+                }
             });
         };
 
