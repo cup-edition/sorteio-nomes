@@ -127,7 +127,7 @@
             background-color: #212529;
             border-radius: 8px;
             text-align: center;
-            min-height: 200px; /* ✅ ALTURA AJUSTADA */
+            min-height: 220px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -144,25 +144,26 @@
         /* ✅ CONTAINER PARA FOTO + NOME - LADO A LADO */
         .container-sorteado {
             display: flex;
-            align-items: center; /* ✅ ALINHA FOTO E NOME NO CENTRO VERTICAL */
+            align-items: center;
             justify-content: center;
-            gap: 15px; /* ✅ ESPAÇO ENTRE FOTO E NOME */
+            gap: 20px;
             animation: aparecer 0.6s ease-out;
             flex-wrap: wrap;
         }
 
-        /* ✅ FOTO PROPORCIONAL AO TAMANHO DO NOME */
+        /* ✅ FOTO GRANDE, DO TAMANHO QUE DEIXAMOS ANTES */
         .foto-sorteado {
-            width: 1em; /* ✅ TAMANHO BASEADO NO TAMANHO DA FONTE */
-            height: 1em; /* ✅ MESMA MEDIDA PARA FICAR QUADRADA/REDONDA */
+            width: 1.8em;
+            height: 1.8em;
             border-radius: 50%;
             object-fit: cover;
-            border: 3px solid #27ae60;
-            box-shadow: 0 0 15px rgba(39, 174, 96, 0.5);
+            border: 4px solid #27ae60;
+            box-shadow: 0 0 20px rgba(39, 174, 96, 0.6);
         }
 
+        /* ✅ NOME DIMINUÍDO UM POUCO */
         .nome-sorteado {
-            font-size: 42px !important;
+            font-size: 36px !important; /* ✅ ERA 42px, AGORA 36px */
             font-weight: bold;
             color: #27ae60;
             text-align: center;
@@ -208,10 +209,9 @@
             gap: 10px;
         }
 
-        /* ✅ FOTO PEQUENA NA LISTA DE SORTEADOS - TAMBÉM PROPORCIONAL */
         .foto-lista {
-            width: 1em;
-            height: 1em;
+            width: 1.2em;
+            height: 1.2em;
             border-radius: 50%;
             object-fit: cover;
             border: 1px solid #ddd;
@@ -432,7 +432,7 @@
             somSorteio.volume = 0.8;
             somSorteio.play();
 
-            // ✅ FOTO AO LADO ESQUERDO, PROPORCIONAL AO TAMANHO DO NOME
+            // ✅ FOTO AO LADO ESQUERDO, NOME UM POUCO MENOR
             document.getElementById('resultado').innerHTML = `
                 <div class="container-sorteado">
                     <img src="${participanteSorteado.foto}" alt="Foto do sorteado" class="foto-sorteado">
