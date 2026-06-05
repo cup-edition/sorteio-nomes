@@ -307,25 +307,32 @@
         const cores = ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f', '#9b59b6', '#1abc9c', '#ff6b6b', '#4ecdc4'];
 
         window.onload = function() {
-            // ✅ AQUI É A MUDANÇA PRINCIPAL: lê os dados do FIM PARA O INÍCIO
+            // ✅ AGORA VAMOS PEGAR OS DADOS E ORDENAR PELA CHAVE DE CRIAÇÃO DO FIREBASE
+            // ✅ CHAVE DO FIREBASE É SEMPRE CRESCENTE: QUANTO MAIOR A CHAVE, MAIS NOVO É O CADASTRO
             db.ref('inscricoes').on('value', function(snapshot) {
-                const todasInscricoes = [];
-                // Pega os dados na ordem inversa do Firebase (último cadastrado primeiro)
+                // Pega todos os itens com sua chave original
+                let listaComChaves = [];
                 snapshot.forEach(item => {
-                    todasInscricoes.unshift(item.val()); // unshift = adiciona no INÍCIO da lista
+                    listaComChaves.push({
+                        dados: item.val(),
+                        chave: item.key // essa chave é única e crescente por ordem de criação
+                    });
                 });
-                
-                // Filtra só os confirmados, já na ordem correta
-                listaParticipantes = todasInscricoes
-                    .filter(inscrito => inscrito && inscrito.status === 'confirmado')
-                    .map(inscrito => {
+
+                // ✅ ORDENA DO MAIS NOVO PARA O MAIS ANTIGO: chave maior = mais novo
+                listaComChaves.sort((a, b) => b.chave.localeCompare(a.chave));
+
+                // ✅ AGORA PEGA SÓ OS DADOS, JÁ NA ORDEM CERTA
+                listaParticipantes = listaComChaves
+                    .filter(item => item.dados && item.dados.status === 'confirmado')
+                    .map(item => {
                         return {
-                            nome: inscrito.nome,
-                            foto: inscrito.foto || 'https://via.placeholder.com/180?text=Sem+Foto'
+                            nome: item.dados.nome,
+                            foto: item.dados.foto || 'https://via.placeholder.com/180?text=Sem+Foto'
                         };
                     });
 
-                // ✅ AGORA NÃO PRECISA DE REVERSE NEM ORDENAÇÃO — JÁ ESTÁ CERTO
+                // ✅ AGORA A ORDEM É: ZUPERBLAHQ_ → DAVI → CLEITON → BARRIGA → ENDRIL → ÍNDIO
                 const textarea = document.getElementById('nomes');
                 if (listaParticipantes.length > 0) {
                     const nomesTexto = listaParticipantes.map(p => p.nome).join('\n');
@@ -451,14 +458,22 @@
 
         function reiniciarSorteio() {
             db.ref('inscricoes').once('value', snapshot => {
-                const todasInscricoes = [];
-                snapshot.forEach(item => todasInscricoes.unshift(item.val())); // ✅ SEMPRE DO ÚLTIMO PARA O PRIMEIRO
+                let listaComChaves = [];
+                snapshot.forEach(item => {
+                    listaComChaves.push({
+                        dados: item.val(),
+                        chave: item.key
+                    });
+                });
+
+                // ✅ ORDENA SEMPRE DO MAIS NOVO PARA O MAIS ANTIGO
+                listaComChaves.sort((a, b) => b.chave.localeCompare(a.chave));
                 
-                listaParticipantes = todasInscricoes
-                    .filter(inscrito => inscrito && inscrito.status === 'confirmado')
-                    .map(inscrito => ({
-                        nome: inscrito.nome,
-                        foto: inscrito.foto || 'https://via.placeholder.com/180?text=Sem+Foto'
+                listaParticipantes = listaComChaves
+                    .filter(item => item.dados && item.dados.status === 'confirmado')
+                    .map(item => ({
+                        nome: item.dados.nome,
+                        foto: item.dados.foto || 'https://via.placeholder.com/180?text=Sem+Foto'
                     }));
 
                 participantesDisponiveis = [...listaParticipantes];
