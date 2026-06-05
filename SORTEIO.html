@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SORTEIO CUP EDITION</title>
-    <!-- ✅ ADICIONADO FIREBASE PARA LER OS DADOS EM TEMPO REAL -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase.js"></script>
     <style>
         * {
@@ -14,7 +13,6 @@
             font-family: Arial, sans-serif;
         }
 
-        /* FUNDO CINZA ESCURO */
         body {
             background-color: #343a40;
             display: flex;
@@ -69,7 +67,7 @@
             border: 2px solid #6c757d;
             border-radius: 8px;
             font-size: 16px;
-            resize: none; /* ✅ DESATIVADO EDIÇÃO MANUAL */
+            resize: none;
             background-color: #212529;
             color: #f8f9fa;
             cursor: not-allowed;
@@ -122,14 +120,13 @@
             color: #3498db;
         }
 
-        /* ✅ CAIXA DE RESULTADO MESMA LARGURA DOS BOTÕES */
         .resultado {
             padding: 20px 15px;
             background-color: #212529;
             border-radius: 8px;
             text-align: center;
             min-height: 180px;
-            width: 100%; /* ✅ LARGURA TOTAL, IGUAL AOS BOTÕES */
+            width: 100%;
             margin: 0 auto 15px auto;
             display: flex;
             align-items: center;
@@ -143,7 +140,6 @@
             color: #e67e22;
         }
 
-        /* ✅ CONTAINER PARA FOTO + NOME - LADO A LADO */
         .container-sorteado {
             display: flex;
             align-items: center;
@@ -153,17 +149,15 @@
             flex-wrap: wrap;
         }
 
-        /* ✅ FOTO NO TAMANHO DE 4.8em, BORDA FINA MANTIDA */
         .foto-sorteado {
             width: 4.8em;
             height: 4.8em;
             border-radius: 50%;
             object-fit: cover;
-            border: 1px solid #27ae60; /* ✅ BORDA SUPER FINA MANTIDA */
+            border: 1px solid #27ae60;
             box-shadow: 0 0 20px rgba(39, 174, 96, 0.5);
         }
 
-        /* ✅ NOME SEM ESTRELINHAS, TAMANHO MANTIDO */
         .nome-sorteado {
             font-size: 36px !important;
             font-weight: bold;
@@ -211,7 +205,6 @@
             gap: 10px;
         }
 
-        /* ✅ FOTO DOS JÁ SORTEADOS TAMANHO MANTIDO */
         .foto-lista {
             width: 1.8em;
             height: 1.8em;
@@ -235,7 +228,6 @@
             100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
         }
         
-        /* ✅ AVISO DE ATUALIZAÇÃO */
         .aviso-atualizacao {
             background-color: #17a2b8;
             color: white;
@@ -254,16 +246,12 @@
     </style>
 </head>
 <body>
-    <!-- TÍTULO ALTERADO CONFORME PEDIDO -->
     <h1>🏆SORTEIO CUP EDITION🏆</h1>
     <div class="container">
-    
-        <!-- ✅ AVISO DE ATUALIZAÇÃO EM TEMPO REAL -->
         <div class="aviso-atualizacao">🔄 Lista atualizada automaticamente com os inscritos confirmados</div>
     
         <div class="input-area">
             <label for="nomes">📋 Nomes dos Confirmados:</label>
-            <!-- ✅ AREA BLOQUEADA, PREENCHIDA AUTOMATICAMENTE -->
             <textarea id="nomes" placeholder="Carregando nomes do banco de dados..." readonly></textarea>
             <div class="contador-nomes">Total de nomes adicionados: <span id="totalNomes">0</span></div>
         </div>
@@ -273,7 +261,6 @@
             <div>Faltam: <span id="quantidadeFaltam">0</span></div>
         </div>
 
-        <!-- ✅ NOME DO BOTÃO ALTERADO PARA "SORTEAR" -->
         <button id="sortearBtn" onclick="sortearNome()">SORTEAR</button>
         <button onclick="reiniciarSorteio()" class="btn-vermelho">Reiniciar Tudo</button>
 
@@ -291,12 +278,10 @@
         </div>
     </div>
 
-    <!-- 🔊 SONS FUNCIONANDO 100% -->
     <audio id="somContagem" preload="auto" src="https://cdn.freesound.org/previews/242/242353_3878527-lq.mp3">
     <audio id="somSorteio" preload="auto" src="https://cdn.freesound.org/previews/142/142603_2215514-lq.mp3">
 
     <script>
-        // ✅ DADOS DO SEU FIREBASE - MESMO DO SISTEMA DE INSCRIÇÕES
         var firebaseConfig = {
             apiKey: "AIzaSyAR--VWkuPUBzKtJlEHPXnwBwbapB8JY_w",
             authDomain: "sistema-inscricoes-e9241.firebaseapp.com",
@@ -307,14 +292,12 @@
             appId: "1:232618438422:web:1c62103b2169e64e862a37"
         };
 
-        // ✅ INICIALIZA O FIREBASE
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         }
         var db = firebase.database();
 
-        // ✅ AGORA GUARDAREMOS TAMBÉM A FOTO E O HORÁRIO, NÃO SÓ O NOME
-        let listaParticipantes = []; // Agora é uma lista de objetos {nome, foto, dataConfirmacao}
+        let listaParticipantes = [];
         let participantesDisponiveis = [];
         let sorteados = [];
         let emContagem = false;
@@ -323,27 +306,26 @@
         const somContagem = document.getElementById('somContagem');
         const cores = ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f', '#9b59b6', '#1abc9c', '#ff6b6b', '#4ecdc4'];
 
-        // ✅ ESCUTA O BANCO DE DADOS EM TEMPO REAL
         window.onload = function() {
+            // ✅ AQUI É A MUDANÇA PRINCIPAL: lê os dados do FIM PARA O INÍCIO
             db.ref('inscricoes').on('value', function(snapshot) {
-                const todasInscricoes = snapshot.val() || [];
+                const todasInscricoes = [];
+                // Pega os dados na ordem inversa do Firebase (último cadastrado primeiro)
+                snapshot.forEach(item => {
+                    todasInscricoes.unshift(item.val()); // unshift = adiciona no INÍCIO da lista
+                });
                 
-                // ✅ PEGA APENAS OS CONFIRMADOS, COM NOME, FOTO E HORÁRIO
+                // Filtra só os confirmados, já na ordem correta
                 listaParticipantes = todasInscricoes
                     .filter(inscrito => inscrito && inscrito.status === 'confirmado')
                     .map(inscrito => {
                         return {
                             nome: inscrito.nome,
-                            foto: inscrito.foto || 'https://via.placeholder.com/180?text=Sem+Foto',
-                            // ✅ PEGA O HORÁRIO EXATO DA CONFIRMAÇÃO (se não tiver, usa data atual)
-                            dataConfirmacao: inscrito.dataConfirmacao ? new Date(inscrito.dataConfirmacao) : new Date()
+                            foto: inscrito.foto || 'https://via.placeholder.com/180?text=Sem+Foto'
                         };
                     });
 
-                // ✅ ORDENA POR HORÁRIO: ÚLTIMOS A CONFIRMAR (MAIS NOVOS) FICAM NO TOPO
-                listaParticipantes.sort((a, b) => b.dataConfirmacao - a.dataConfirmacao);
-
-                // ✅ ATUALIZA A CAIXA DE TEXTO JÁ ORDENADA
+                // ✅ AGORA NÃO PRECISA DE REVERSE NEM ORDENAÇÃO — JÁ ESTÁ CERTO
                 const textarea = document.getElementById('nomes');
                 if (listaParticipantes.length > 0) {
                     const nomesTexto = listaParticipantes.map(p => p.nome).join('\n');
@@ -352,20 +334,16 @@
                     textarea.value = 'Nenhum inscrito confirmado no momento';
                 }
 
-                // ✅ ATUALIZA CONTADOR
                 document.getElementById('totalNomes').textContent = listaParticipantes.length;
 
-                // ✅ SE A LISTA MUDAR, REINICIA OS DISPONÍVEIS PARA MANTER ATUALIZADO
                 if (participantesDisponiveis.length === 0 || !verificarListasIguais(participantesDisponiveis, listaParticipantes)) {
                     participantesDisponiveis = [...listaParticipantes];
                     atualizarInfoSorteio();
                 }
 
-                // ✅ LIBERA OU BLOQUEIA O BOTÃO
                 document.getElementById('sortearBtn').disabled = (listaParticipantes.length === 0);
             });
             
-            // ✅ TECLA ESPAÇO: SÓ FUNCIONA SE HOUVER DISPONÍVEIS E NÃO ESTIVER SORTEANDO
             document.addEventListener('keydown', function(event) {
                 if ((event.code === 'Space' || event.key === ' ') && participantesDisponiveis.length > 0 && !emContagem) {
                     event.preventDefault();
@@ -374,20 +352,17 @@
             });
         };
 
-        // ✅ FUNÇÃO AUXILIAR PARA COMPARAR LISTAS
         function verificarListasIguais(lista1, lista2) {
             const nomes1 = lista1.map(p => p.nome).sort();
             const nomes2 = lista2.map(p => p.nome).sort();
             return JSON.stringify(nomes1) === JSON.stringify(nomes2);
         }
 
-        // Atualiza as informações de sorteados e faltantes
         function atualizarInfoSorteio() {
             document.getElementById('quantidadeSorteados').textContent = sorteados.length;
             document.getElementById('quantidadeFaltam').textContent = participantesDisponiveis.length;
         }
 
-        // FUNÇÃO DE SORTEIO
         function sortearNome() {
             if (emContagem || listaParticipantes.length === 0 || participantesDisponiveis.length === 0) return;
 
@@ -399,7 +374,6 @@
             let tempo = 3;
             const resultadoEl = document.getElementById('resultado');
             
-            // CONTAGEM REGRESSIVA COM SOM
             const contagemIntervalo = setInterval(() => {
                 somContagem.currentTime = 0;
                 somContagem.volume = 0.7;
@@ -420,12 +394,10 @@
             const participanteSorteado = participantesDisponiveis.splice(indiceSorteado, 1)[0];
             sorteados.push(participanteSorteado);
 
-            // SOM DE PREMIAÇÃO FUNCIONANDO
             somSorteio.currentTime = 0;
             somSorteio.volume = 0.8;
             somSorteio.play();
 
-            // ✅ SEM ESTRELINHAS, FOTO AO LADO ESQUERDO
             document.getElementById('resultado').innerHTML = `
                 <div class="container-sorteado">
                     <img src="${participanteSorteado.foto}" alt="Foto do sorteado" class="foto-sorteado">
@@ -433,14 +405,12 @@
                 </div>
             `;
             
-            // CONFETES
             criarConfetes(100);
             atualizarListaSorteados();
             atualizarInfoSorteio();
 
             emContagem = false;
             
-            // ✅ QUANDO ACABAR, BLOQUEIA TUDO (TECLA ESPAÇO JÁ ESTÁ BLOQUEADA PELA CONDIÇÃO)
             if (participantesDisponiveis.length === 0) {
                 document.getElementById('sortearBtn').disabled = true;
                 document.getElementById('mensagemFinal').style.display = 'block';
@@ -480,21 +450,16 @@
         }
 
         function reiniciarSorteio() {
-            // ✅ AO REINICIAR, PEGA SEMPRE A LISTA MAIS RECENTE E ORDENADA POR HORÁRIO
             db.ref('inscricoes').once('value', snapshot => {
-                const todasInscricoes = snapshot.val() || [];
+                const todasInscricoes = [];
+                snapshot.forEach(item => todasInscricoes.unshift(item.val())); // ✅ SEMPRE DO ÚLTIMO PARA O PRIMEIRO
+                
                 listaParticipantes = todasInscricoes
                     .filter(inscrito => inscrito && inscrito.status === 'confirmado')
-                    .map(inscrito => {
-                        return {
-                            nome: inscrito.nome,
-                            foto: inscrito.foto || 'https://via.placeholder.com/180?text=Sem+Foto',
-                            dataConfirmacao: inscrito.dataConfirmacao ? new Date(inscrito.dataConfirmacao) : new Date()
-                        };
-                    });
-
-                // ✅ ORDENA NOVAMENTE: ÚLTIMOS A CONFIRMAR NO TOPO
-                listaParticipantes.sort((a, b) => b.dataConfirmacao - a.dataConfirmacao);
+                    .map(inscrito => ({
+                        nome: inscrito.nome,
+                        foto: inscrito.foto || 'https://via.placeholder.com/180?text=Sem+Foto'
+                    }));
 
                 participantesDisponiveis = [...listaParticipantes];
                 sorteados = [];
