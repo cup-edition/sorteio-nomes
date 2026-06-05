@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sorteio de Nomes - Sem Repetição</title>
+    <title>SORTEIO CUP EDITION</title>
     <style>
         * {
             margin: 0;
@@ -12,7 +12,7 @@
             font-family: Arial, sans-serif;
         }
 
-        /* FUNDO ALTERADO PARA CINZA ESCURO */
+        /* FUNDO CINZA ESCURO */
         body {
             background-color: #343a40;
             display: flex;
@@ -24,13 +24,14 @@
         }
 
         h1 {
-            color: #f8f9fa; /* Cor clara para contrastar com fundo escuro */
+            color: #f8f9fa;
             margin-bottom: 25px;
             text-align: center;
+            font-size: 26px;
         }
 
         .container {
-            background-color: #495057; /* Cinza um pouco mais claro que o fundo */
+            background-color: #495057;
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
@@ -47,7 +48,7 @@
         label {
             display: block;
             margin-bottom: 8px;
-            color: #f8f9fa; /* Texto claro */
+            color: #f8f9fa;
             font-weight: bold;
         }
 
@@ -199,7 +200,8 @@
     </style>
 </head>
 <body>
-    <h1>🎯 Sorteio de Nomes</h1>
+    <!-- TÍTULO ALTERADO CONFORME PEDIDO -->
+    <h1>🏆SORTEIO CUP EDITION🏆</h1>
     <div class="container">
         <div class="input-area">
             <label for="nomes">Digite os nomes (um por linha):</label>
@@ -208,11 +210,9 @@ Maria
 João
 Ana
 Pedro" oninput="atualizarContadorNomes()"></textarea>
-            <!-- CONTADOR DE NOMES ADICIONADO -->
             <div class="contador-nomes">Total de nomes adicionados: <span id="totalNomes">0</span></div>
         </div>
 
-        <!-- INFORMAÇÕES DE QUANTOS FALTAM E QUANTOS JÁ SORTEARAM -->
         <div class="info-sorteio">
             <div>Já sorteados: <span id="quantidadeSorteados">0</span></div>
             <div>Faltam: <span id="quantidadeFaltam">0</span></div>
@@ -328,7 +328,7 @@ Pedro" oninput="atualizarContadorNomes()"></textarea>
             // CONFETES
             criarConfetes(100);
             atualizarListaSorteados();
-            atualizarInfoSorteio(); // Atualiza os números após sortear
+            atualizarInfoSorteio();
 
             emContagem = false;
             
