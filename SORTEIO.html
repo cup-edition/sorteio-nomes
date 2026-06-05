@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SORTEIO CUP EDITION</title>
+    <!-- ✅ ADICIONADO FIREBASE PARA LER OS DADOS EM TEMPO REAL -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase.js"></script>
     <style>
         * {
             margin: 0;
@@ -67,9 +69,10 @@
             border: 2px solid #6c757d;
             border-radius: 8px;
             font-size: 16px;
-            resize: vertical;
+            resize: none; /* ✅ DESATIVADO EDIÇÃO MANUAL */
             background-color: #212529;
             color: #f8f9fa;
+            cursor: not-allowed;
         }
 
         textarea:focus {
@@ -197,19 +200,37 @@
             0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
             100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
         }
+        
+        /* ✅ AVISO DE ATUALIZAÇÃO */
+        .aviso-atualizacao {
+            background-color: #17a2b8;
+            color: white;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 13px;
+            text-align: center;
+            margin-bottom: 15px;
+            animation: piscar 1.5s infinite alternate;
+        }
+        
+        @keyframes piscar {
+            0% {opacity: 0.8;}
+            100% {opacity: 1;}
+        }
     </style>
 </head>
 <body>
     <!-- TÍTULO ALTERADO CONFORME PEDIDO -->
     <h1>🏆SORTEIO CUP EDITION🏆</h1>
     <div class="container">
+    
+        <!-- ✅ AVISO DE ATUALIZAÇÃO EM TEMPO REAL -->
+        <div class="aviso-atualizacao">🔄 Lista atualizada automaticamente com os inscritos confirmados</div>
+    
         <div class="input-area">
-            <label for="nomes">Digite os nomes (um por linha):</label>
-            <textarea id="nomes" placeholder="Exemplo:
-Maria
-João
-Ana
-Pedro" oninput="atualizarContadorNomes()"></textarea>
+            <label for="nomes">📋 Nomes dos Confirmados:</label>
+            <!-- ✅ AREA BLOQUEADA, PREENCHIDA AUTOMATICAMENTE -->
+            <textarea id="nomes" placeholder="Carregando nomes do banco de dados..." readonly></textarea>
             <div class="contador-nomes">Total de nomes adicionados: <span id="totalNomes">0</span></div>
         </div>
 
@@ -226,7 +247,7 @@ Pedro" oninput="atualizarContadorNomes()"></textarea>
         </div>
 
         <div class="resultado" id="resultado">
-            <p style="font-size:18px; color:#ced4da;">Digite os nomes acima e clique em sortear</p>
+            <p style="font-size:18px; color:#ced4da;">Aguardando nomes...<br>Quando aparecerem, clique em sortear</p>
         </div>
 
         <div class="lista-sorteados">
@@ -240,6 +261,23 @@ Pedro" oninput="atualizarContadorNomes()"></textarea>
     <audio id="somSorteio" preload="auto" src="https://cdn.freesound.org/previews/142/142603_2215514-lq.mp3">
 
     <script>
+        // ✅ DADOS DO SEU FIREBASE - MESMO DO SISTEMA DE INSCRIÇÕES
+        var firebaseConfig = {
+            apiKey: "AIzaSyAR--VWkuPUBzKtJlEHPXnwBwbapB8JY_w",
+            authDomain: "sistema-inscricoes-e9241.firebaseapp.com",
+            databaseURL: "https://sistema-inscricoes-e9241-default-rtdb.firebaseio.com",
+            projectId: "sistema-inscricoes-e9241",
+            storageBucket: "sistema-inscricoes-e9241.firebasestorage.app",
+            messagingSenderId: "232618438422",
+            appId: "1:232618438422:web:1c62103b2169e64e862a37"
+        };
+
+        // ✅ INICIALIZA O FIREBASE
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        var db = firebase.database();
+
         let listaNomes = [];
         let nomesDisponiveis = [];
         let sorteados = [];
@@ -249,12 +287,42 @@ Pedro" oninput="atualizarContadorNomes()"></textarea>
         const somContagem = document.getElementById('somContagem');
         const cores = ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f', '#9b59b6', '#1abc9c', '#ff6b6b', '#4ecdc4'];
 
-        // Atualiza a contagem de nomes enquanto digita
-        function atualizarContadorNomes() {
-            const texto = document.getElementById('nomes').value;
-            const quantidade = texto.split('\n').filter(nome => nome.trim() !== '').length;
-            document.getElementById('totalNomes').textContent = quantidade;
-            atualizarInfoSorteio();
+        // ✅ ESCUTA O BANCO DE DADOS EM TEMPO REAL
+        window.onload = function() {
+            db.ref('inscricoes').on('value', function(snapshot) {
+                const todasInscricoes = snapshot.val() || [];
+                
+                // ✅ PEGA APENAS OS NOMES COM STATUS "confirmado"
+                const nomesConfirmados = todasInscricoes
+                    .filter(inscrito => inscrito && inscrito.status === 'confirmado')
+                    .map(inscrito => inscrito.nome);
+
+                // ✅ ATUALIZA A CAIXA DE TEXTO AUTOMATICAMENTE
+                const textarea = document.getElementById('nomes');
+                if (nomesConfirmados.length > 0) {
+                    textarea.value = nomesConfirmados.join('\n');
+                } else {
+                    textarea.value = 'Nenhum inscrito confirmado no momento';
+                }
+
+                // ✅ ATUALIZA CONTADOR
+                document.getElementById('totalNomes').textContent = nomesConfirmados.length;
+
+                // ✅ SE A LISTA MUDAR, REINICIA OS DISPONÍVEIS PARA MANTER ATUALIZADO
+                listaNomes = [...nomesConfirmados];
+                if (nomesDisponiveis.length === 0 || !verificarListasIguais(nomesDisponiveis, listaNomes)) {
+                    nomesDisponiveis = [...listaNomes];
+                    atualizarInfoSorteio();
+                }
+
+                // ✅ LIBERA OU BLOQUEIA O BOTÃO
+                document.getElementById('sortearBtn').disabled = (nomesConfirmados.length === 0);
+            });
+        };
+
+        // ✅ FUNÇÃO AUXILIAR PARA COMPARAR LISTAS
+        function verificarListasIguais(lista1, lista2) {
+            return JSON.stringify(lista1.sort()) === JSON.stringify(lista2.sort());
         }
 
         // Atualiza as informações de sorteados e faltantes
@@ -265,21 +333,14 @@ Pedro" oninput="atualizarContadorNomes()"></textarea>
 
         // FUNÇÃO DE SORTEIO
         function sortearNome() {
-            if (emContagem) return;
+            if (emContagem || listaNomes.length === 0) return;
 
             document.getElementById('mensagemFinal').style.display = 'none';
-            const texto = document.getElementById('nomes').value.trim();
-            
-            if (!texto) {
-                alert('Por favor, digite pelo menos um nome!');
-                return;
-            }
-
-            listaNomes = texto.split('\n').map(nome => nome.trim()).filter(nome => nome !== '');
 
             if (nomesDisponiveis.length === 0) {
                 nomesDisponiveis = [...listaNomes];
                 sorteados = [];
+                atualizarInfoSorteio();
             }
 
             if (nomesDisponiveis.length === 0) {
@@ -368,17 +429,24 @@ Pedro" oninput="atualizarContadorNomes()"></textarea>
         }
 
         function reiniciarSorteio() {
-            listaNomes = [];
-            nomesDisponiveis = [];
-            sorteados = [];
-            emContagem = false;
-            document.getElementById('nomes').value = '';
-            document.getElementById('totalNomes').textContent = '0';
-            document.getElementById('resultado').innerHTML = '<p style="font-size:18px; color:#ced4da;">Digite os nomes acima e clique em sortear</p>';
-            document.getElementById('listaSorteados').innerHTML = '';
-            document.getElementById('mensagemFinal').style.display = 'none';
-            document.getElementById('sortearBtn').disabled = false;
-            atualizarInfoSorteio();
+            // ✅ AO REINICIAR, PEGA SEMPRE A LISTA MAIS RECENTE DO BANCO
+            db.ref('inscricoes').once('value', snapshot => {
+                const todasInscricoes = snapshot.val() || [];
+                const nomesConfirmados = todasInscricoes
+                    .filter(inscrito => inscrito && inscrito.status === 'confirmado')
+                    .map(inscrito => inscrito.nome);
+
+                listaNomes = [...nomesConfirmados];
+                nomesDisponiveis = [...listaNomes];
+                sorteados = [];
+                emContagem = false;
+                
+                document.getElementById('resultado').innerHTML = '<p style="font-size:18px; color:#ced4da;">Pronto para novo sorteio!</p>';
+                document.getElementById('listaSorteados').innerHTML = '';
+                document.getElementById('mensagemFinal').style.display = 'none';
+                document.getElementById('sortearBtn').disabled = (listaNomes.length === 0);
+                atualizarInfoSorteio();
+            });
         }
     </script>
 </body>
