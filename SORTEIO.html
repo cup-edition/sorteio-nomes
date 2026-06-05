@@ -313,8 +313,8 @@
         }
         var db = firebase.database();
 
-        // ✅ AGORA GUARDAREMOS TAMBÉM A FOTO, NÃO SÓ O NOME
-        let listaParticipantes = []; // Agora é uma lista de objetos {nome, foto}
+        // ✅ AGORA GUARDAREMOS TAMBÉM A FOTO E O HORÁRIO, NÃO SÓ O NOME
+        let listaParticipantes = []; // Agora é uma lista de objetos {nome, foto, dataConfirmacao}
         let participantesDisponiveis = [];
         let sorteados = [];
         let emContagem = false;
@@ -328,18 +328,20 @@
             db.ref('inscricoes').on('value', function(snapshot) {
                 const todasInscricoes = snapshot.val() || [];
                 
-                // ✅ PEGA APENAS OS CONFIRMADOS, COM NOME E FOTO
+                // ✅ PEGA APENAS OS CONFIRMADOS, COM NOME, FOTO E HORÁRIO
                 listaParticipantes = todasInscricoes
                     .filter(inscrito => inscrito && inscrito.status === 'confirmado')
                     .map(inscrito => {
                         return {
                             nome: inscrito.nome,
-                            foto: inscrito.foto || 'https://via.placeholder.com/180?text=Sem+Foto'
+                            foto: inscrito.foto || 'https://via.placeholder.com/180?text=Sem+Foto',
+                            // ✅ PEGA O HORÁRIO EXATO DA CONFIRMAÇÃO (se não tiver, usa data atual)
+                            dataConfirmacao: inscrito.dataConfirmacao ? new Date(inscrito.dataConfirmacao) : new Date()
                         };
                     });
 
-                // ✅ ORDENA: ÚLTIMOS A CONFIRMAR FICAM NO TOPO
-                listaParticipantes = listaParticipantes.reverse();
+                // ✅ ORDENA POR HORÁRIO: ÚLTIMOS A CONFIRMAR (MAIS NOVOS) FICAM NO TOPO
+                listaParticipantes.sort((a, b) => b.dataConfirmacao - a.dataConfirmacao);
 
                 // ✅ ATUALIZA A CAIXA DE TEXTO JÁ ORDENADA
                 const textarea = document.getElementById('nomes');
@@ -478,7 +480,7 @@
         }
 
         function reiniciarSorteio() {
-            // ✅ AO REINICIAR, PEGA SEMPRE A LISTA MAIS RECENTE E JÁ ORDENADA
+            // ✅ AO REINICIAR, PEGA SEMPRE A LISTA MAIS RECENTE E ORDENADA POR HORÁRIO
             db.ref('inscricoes').once('value', snapshot => {
                 const todasInscricoes = snapshot.val() || [];
                 listaParticipantes = todasInscricoes
@@ -486,12 +488,13 @@
                     .map(inscrito => {
                         return {
                             nome: inscrito.nome,
-                            foto: inscrito.foto || 'https://via.placeholder.com/180?text=Sem+Foto'
+                            foto: inscrito.foto || 'https://via.placeholder.com/180?text=Sem+Foto',
+                            dataConfirmacao: inscrito.dataConfirmacao ? new Date(inscrito.dataConfirmacao) : new Date()
                         };
                     });
 
-                // ✅ MANTÉM A ORDEM: ÚLTIMOS NO TOPO
-                listaParticipantes = listaParticipantes.reverse();
+                // ✅ ORDENA NOVAMENTE: ÚLTIMOS A CONFIRMAR NO TOPO
+                listaParticipantes.sort((a, b) => b.dataConfirmacao - a.dataConfirmacao);
 
                 participantesDisponiveis = [...listaParticipantes];
                 sorteados = [];
