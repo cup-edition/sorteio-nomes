@@ -122,14 +122,14 @@
             color: #3498db;
         }
 
-        /* ✅ CAIXA DO RESULTADO DIMINUÍDA */
+        /* ✅ CAIXA DE RESULTADO MESMA LARGURA DOS BOTÕES */
         .resultado {
-            padding: 20px 15px; /* ✅ ESPAÇAMENTO MENOR */
+            padding: 20px 15px;
             background-color: #212529;
             border-radius: 8px;
             text-align: center;
-            min-height: 180px; /* ✅ ALTURA BEM MENOR QUE ANTES */
-            max-width: 400px; /* ✅ LARGURA TAMBÉM MENOR */
+            min-height: 180px;
+            width: 100%; /* ✅ LARGURA TOTAL, IGUAL AOS BOTÕES */
             margin: 0 auto 15px auto;
             display: flex;
             align-items: center;
@@ -148,22 +148,22 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 20px; /* ✅ ESPAÇO AJUSTADO */
+            gap: 20px;
             animation: aparecer 0.6s ease-out;
             flex-wrap: wrap;
         }
 
-        /* ✅ FOTO 4X MAIOR COM BORDA SUPER FINA */
+        /* ✅ FOTO AUMENTADA MAIS UM POUCO (DE 4em PARA 4.8em) - BORDA FINA MANTIDA */
         .foto-sorteado {
-            width: 4em;
-            height: 4em;
+            width: 4.8em;
+            height: 4.8em;
             border-radius: 50%;
             object-fit: cover;
-            border: 1px solid #27ae60; /* ✅ BORDA SUPER FINA (1px) */
+            border: 1px solid #27ae60; /* ✅ BORDA SUPER FINA MANTIDA */
             box-shadow: 0 0 20px rgba(39, 174, 96, 0.5);
         }
 
-        /* ✅ NOME SEM ESTRELINHAS, TAMANHO 36px COMO VOCÊ QUERIA */
+        /* ✅ NOME SEM ESTRELINHAS, TAMANHO MANTIDO */
         .nome-sorteado {
             font-size: 36px !important;
             font-weight: bold;
@@ -211,9 +211,9 @@
             gap: 10px;
         }
 
-        /* ✅ FOTO DOS JÁ SORTEADOS AUMENTADA UM POUCO */
+        /* ✅ FOTO DOS JÁ SORTEADOS TAMANHO MANTIDO */
         .foto-lista {
-            width: 1.8em; /* ✅ ERA 1.2em, AGORA 1.8em */
+            width: 1.8em;
             height: 1.8em;
             border-radius: 50%;
             object-fit: cover;
