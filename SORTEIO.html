@@ -297,8 +297,8 @@
         }
         var db = firebase.database();
 
-        let listaOriginal = []; // lista completa, todos os confirmados, em ordem alfabética
-        let participantesDisponiveis = []; // lista que vai diminuindo ao sortear
+        let listaOriginal = [];
+        let participantesDisponiveis = [];
         let sorteados = [];
         let emContagem = false;
 
@@ -306,15 +306,14 @@
         const somContagem = document.getElementById('somContagem');
         const cores = ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f', '#9b59b6', '#1abc9c', '#ff6b6b', '#4ecdc4'];
 
+        // ✅ COLE AQUI O LINK DA SUA API DO GOOGLE SHEETS
+        const LINK_API_GOOGLE = "https://script.google.com/macros/s/AKfycbxOIhY3KAnH0wvStOl7m7Lqay_wc_dcKFBwnoZVrQn5r7OKv0bIeoQHcBekiuP6GNDfzQ/exec";
+
         window.onload = function() {
-            // ✅ AGORA GARANTE QUE VAI PEGAR TODOS OS CONFIRMADOS, SEM FALTAR NENHUM
             db.ref('inscricoes').on('value', function(snapshot) {
                 const todasInscricoes = [];
-                
-                // Percorre todos os cadastros
                 snapshot.forEach(item => {
                     const dados = item.val();
-                    // Só adiciona se for confirmado
                     if (dados && dados.status === 'confirmado') {
                         todasInscricoes.push({
                             nome: dados.nome,
@@ -323,10 +322,8 @@
                     }
                 });
 
-                // ✅ ORDENA TUDO EM ORDEM ALFABÉTICA
                 listaOriginal = todasInscricoes.sort((a, b) => a.nome.localeCompare(b.nome));
 
-                // ✅ Sempre atualiza a lista disponível, MAS SÓ SE NÃO ESTIVER NO MEIO DE SORTEIO
                 if (!emContagem) {
                     participantesDisponiveis = [...listaOriginal];
                 }
@@ -337,7 +334,6 @@
                 document.getElementById('sortearBtn').disabled = (listaOriginal.length === 0);
             });
             
-            // Tecla espaço para sortear
             document.addEventListener('keydown', function(event) {
                 if ((event.code === 'Space' || event.key === ' ') && participantesDisponiveis.length > 0 && !emContagem) {
                     event.preventDefault();
@@ -346,7 +342,6 @@
             });
         };
 
-        // Atualiza a caixa com os nomes que ainda não foram sorteados
         function atualizarCaixaNomes() {
             const textarea = document.getElementById('nomes');
             if (participantesDisponiveis.length > 0) {
@@ -386,10 +381,12 @@
         }
 
         function realizarSorteioReal() {
-            // Sorteia e remove da lista disponível
             const indiceSorteado = Math.floor(Math.random() * participantesDisponiveis.length);
             const participanteSorteado = participantesDisponiveis.splice(indiceSorteado, 1)[0];
             sorteados.push(participanteSorteado);
+
+            // ✅ AQUI ESTÁ A ALTERAÇÃO: COLUNAS B, C, D, E
+            enviarParaPlanilha(sorteados.length, participanteSorteado.nome);
 
             somSorteio.currentTime = 0;
             somSorteio.volume = 0.8;
@@ -403,19 +400,41 @@
             `;
             
             criarConfetes(100);
-            atualizarCaixaNomes(); // Atualiza a caixa, removendo o nome sorteado
+            atualizarCaixaNomes();
             atualizarListaSorteados();
             atualizarInfoSorteio();
 
             emContagem = false;
             
-            // Se acabaram os nomes
             if (participantesDisponiveis.length === 0) {
                 document.getElementById('sortearBtn').disabled = true;
                 document.getElementById('mensagemFinal').style.display = 'block';
             } else {
                 document.getElementById('sortearBtn').disabled = false;
             }
+        }
+
+        // ✅ FUNÇÃO AJUSTADA PARA COMEÇAR NA COLUNA B
+        function enviarParaPlanilha(posicao, nome) {
+            // Colunas: B (TIME1), C (TIME2), D (TIME3), E (TIME4)
+            const colunas = ['B', 'C', 'D', 'E']; 
+            const linhaInicial = 14; // começa na linha 14
+
+            // Calcula qual coluna e linha vai receber
+            const indiceColuna = (posicao - 1) % 4;
+            const indiceLinha = linhaInicial + Math.floor((posicao - 1) / 4);
+
+            const celula = colunas[indiceColuna] + indiceLinha;
+
+            console.log(`✅ ${posicao}º → ${nome} → Célula ${celula}`);
+
+            fetch(`${LINK_API_GOOGLE}?celula=${celula}&nome=${encodeURIComponent(nome)}`)
+                .then(res => res.json())
+                .then(dados => {
+                    if(dados.sucesso) console.log("Salvo na planilha!");
+                    else console.error("Erro:", dados.erro);
+                })
+                .catch(err => console.error("Falha:", err));
         }
 
         function criarConfetes(quantidade) {
@@ -448,7 +467,6 @@
             });
         }
 
-        // ✅ SÓ AQUI VOLTA TODOS OS NOMES, EM ORDEM ALFABÉTICA NOVAMENTE
         function reiniciarSorteio() {
             participantesDisponiveis = [...listaOriginal];
             sorteados = [];
