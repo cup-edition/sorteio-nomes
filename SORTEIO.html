@@ -243,38 +243,78 @@
             0% {opacity: 0.8;}
             100% {opacity: 1;}
         }
+
+        /* ===== ESTILOS DA TELA DE LOGIN ===== */
+        #telaLogin {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .caixa-login {
+            background: white; padding: 40px 30px; border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            width: 100%; max-width: 350px; text-align: center;
+        }
+        .caixa-login h2 {color: #2c3e50; margin-bottom: 20px; font-size: 22px;}
+        .caixa-login input {width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; font-size: 15px; text-transform: none; font-weight: normal;}
+        .caixa-login button {width: 100%; padding: 12px; background-color: #27ae60; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: background 0.2s;}
+        .caixa-login button:hover {background-color: #219653;}
+        .errologin {color: #e74c3c; font-size: 14px; margin-top: 10px; display: none; font-weight: bold;}
+
+        #conteudoPrincipal {display: none; width: 100%;}
     </style>
 </head>
 <body>
-    <h1>🏆SORTEIO CUP EDITION🏆</h1>
-    <div class="container">
-        <div class="aviso-atualizacao">🔄 Lista atualizada automaticamente com os inscritos confirmados</div>
-    
-        <div class="input-area">
-            <label for="nomes">📋 Nomes dos Confirmados:</label>
-            <textarea id="nomes" placeholder="Carregando nomes do banco de dados..." readonly></textarea>
-            <div class="contador-nomes">Total de nomes adicionados: <span id="totalNomes">0</span></div>
+
+    <!-- ✅ TELA DE LOGIN ADICIONADA -->
+    <div id="telaLogin">
+        <div class="caixa-login">
+            <h2>🔐 ACESSO RESTRITO</h2>
+            <input type="text" id="usuarioLogin" placeholder="USUÁRIO" required oninput="verificarUsuario()">
+            <input type="password" id="senhaLogin" placeholder="SENHA" required onkeydown="if(event.key === 'Enter') fazerLogin()">
+            <button onclick="fazerLogin()">ENTRAR</button>
+            <div class="errologin" id="mensagemErro">USUÁRIO OU SENHA INCORRETOS!</div>
         </div>
+    </div>
 
-        <div class="info-sorteio">
-            <div>Já sorteados: <span id="quantidadeSorteados">0</span></div>
-            <div>Faltam: <span id="quantidadeFaltam">0</span></div>
-        </div>
+    <div id="conteudoPrincipal">
+        <h1>🏆SORTEIO CUP EDITION🏆</h1>
+        <div class="container">
+            <div class="aviso-atualizacao">🔄 Lista atualizada automaticamente com os inscritos confirmados</div>
+        
+            <div class="input-area">
+                <label for="nomes">📋 Nomes dos Confirmados:</label>
+                <textarea id="nomes" placeholder="Carregando nomes do banco de dados..." readonly></textarea>
+                <div class="contador-nomes">Total de nomes adicionados: <span id="totalNomes">0</span></div>
+            </div>
 
-        <button id="sortearBtn" onclick="sortearNome()">SORTEAR</button>
-        <button onclick="reiniciarSorteio()" class="btn-vermelho">Reiniciar Tudo</button>
+            <div class="info-sorteio">
+                <div>Já sorteados: <span id="quantidadeSorteados">0</span></div>
+                <div>Faltam: <span id="quantidadeFaltam">0</span></div>
+            </div>
 
-        <div class="mensagem-final" id="mensagemFinal" style="display: none;">
-            🎉 Todos os nomes foram sorteados! 🎉
-        </div>
+            <button id="sortearBtn" onclick="sortearNome()">SORTEAR</button>
+            <button onclick="reiniciarSorteio()" class="btn-vermelho">Reiniciar Tudo</button>
 
-        <div class="resultado" id="resultado">
-            <p style="font-size:18px; color:#ced4da;">Aguardando nomes...<br>Quando aparecerem, clique em sortear</p>
-        </div>
+            <div class="mensagem-final" id="mensagemFinal" style="display: none;">
+                🎉 Todos os nomes foram sorteados! 🎉
+            </div>
 
-        <div class="lista-sorteados">
-            <h3>Nomes já sorteados:</h3>
-            <ul id="listaSorteados"></ul>
+            <div class="resultado" id="resultado">
+                <p style="font-size:18px; color:#ced4da;">Aguardando nomes...<br>Quando aparecerem, clique em sortear</p>
+            </div>
+
+            <div class="lista-sorteados">
+                <h3>Nomes já sorteados:</h3>
+                <ul id="listaSorteados"></ul>
+            </div>
         </div>
     </div>
 
@@ -309,7 +349,30 @@
         // ✅ COLE AQUI O LINK DA SUA API DO GOOGLE SHEETS
         const LINK_API_GOOGLE = "https://script.google.com/macros/s/AKfycbz_zng8o_uCc0D5ZYB0FhOSRD7vXykuZc3uz2eZGQh29dVmMd2Q9kabJ3GeZJhpRPdsLg/exec";
 
-        window.onload = function() {
+        // ===== FUNÇÕES DE LOGIN =====
+        function verificarUsuario() {
+            const usuario = document.getElementById('usuarioLogin').value.trim();
+            if (usuario === "campim") {
+                document.getElementById('senhaLogin').focus();
+            }
+        }
+
+        function fazerLogin() {
+            const usuario = document.getElementById('usuarioLogin').value.trim();
+            const senha = document.getElementById('senhaLogin').value.trim();
+            const mensagemErro = document.getElementById('mensagemErro');
+
+            if (usuario === "campim" && senha === "4262") {
+                document.getElementById('telaLogin').style.display = 'none';
+                document.getElementById('conteudoPrincipal').style.display = 'block';
+                iniciarSistema();
+            } else {
+                mensagemErro.style.display = 'block';
+                document.getElementById('senhaLogin').value = '';
+            }
+        }
+
+        function iniciarSistema() {
             db.ref('inscricoes').on('value', function(snapshot) {
                 const todasInscricoes = [];
                 snapshot.forEach(item => {
@@ -340,7 +403,7 @@
                     sortearNome();
                 }
             });
-        };
+        }
 
         function atualizarCaixaNomes() {
             const textarea = document.getElementById('nomes');
