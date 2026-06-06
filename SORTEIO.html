@@ -15,12 +15,13 @@
 
         body {
             background-color: #343a40;
+            /* ✅ ALTERAÇÃO: Centraliza todo o conteúdo vertical e horizontalmente */
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            padding: 30px;
             min-height: 100vh;
             overflow-x: hidden;
+            padding: 20px; /* Adiciona um pequeno espaçamento nas laterais em telas pequenas */
         }
 
         h1 {
@@ -268,7 +269,14 @@
         .caixa-login button:hover {background-color: #219653;}
         .errologin {color: #e74c3c; font-size: 14px; margin-top: 10px; display: none; font-weight: bold;}
 
-        #conteudoPrincipal {display: none; width: 100%;}
+        #conteudoPrincipal {
+            display: none; 
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
     </style>
 </head>
 <body>
@@ -364,7 +372,7 @@
 
             if (usuario === "campim" && senha === "4262") {
                 document.getElementById('telaLogin').style.display = 'none';
-                document.getElementById('conteudoPrincipal').style.display = 'block';
+                document.getElementById('conteudoPrincipal').style.display = 'flex';
                 iniciarSistema();
             } else {
                 mensagemErro.style.display = 'block';
