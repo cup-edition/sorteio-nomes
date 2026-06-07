@@ -325,10 +325,6 @@
         </div>
     </div>
 
-    <!-- ✅ ÁUDIO CORRIGIDO: Tags fechadas e configuradas para funcionar -->
-    <audio id="somContagem" preload="auto" src="https://cdn.freesound.org/previews/242/242353_3878527-lq.mp3">
-    <audio id="somSorteio" preload="auto" src="https://cdn.freesound.org/previews/142/142603_2215514-lq.mp3">
-
     <script>
         var firebaseConfig = {
             apiKey: "AIzaSyAR--VWkuPUBzKtJlEHPXnwBwbapB8JY_w",
@@ -350,23 +346,30 @@
         let sorteados = [];
         let emContagem = false;
 
-        // ✅ SOMS CARREGADOS E CONFIGURADOS PARA TOCAR
-        const somSorteio = document.getElementById('somSorteio');
-        const somContagem = document.getElementById('somContagem');
-        
-        // Força carregar os arquivos de áudio
-        somSorteio.load();
-        somContagem.load();
-        somSorteio.volume = 0.8;
-        somContagem.volume = 0.7;
+        // ✅ SOMS CRIADOS DIRETAMENTE NO JAVASCRIPT (MAIS CONFIÁVEL)
+        let somContagem, somSorteio;
 
-        // ✅ Desbloqueia áudio (obrigatório nos navegadores modernos)
-        document.addEventListener('click', function desbloquearAudio() {
-            somSorteio.play().catch(() => {});
-            somSorteio.pause();
-            somContagem.play().catch(() => {});
-            somContagem.pause();
-            document.removeEventListener('click', desbloquearAudio);
+        // ✅ CARREGA OS SONS ASSIM QUE A PÁGINA ABRE
+        window.addEventListener('DOMContentLoaded', () => {
+            somContagem = new Audio('https://cdn.freesound.org/previews/242/242353_3878527-lq.mp3');
+            somSorteio = new Audio('https://cdn.freesound.org/previews/142/142603_2215514-lq.mp3');
+            
+            somContagem.load();
+            somSorteio.load();
+            somContagem.volume = 0.7;
+            somSorteio.volume = 0.8;
+
+            // ✅ TRUQUE OBRIGATÓRIO PARA NAVEGADORES PERMITIREM SOM
+            const desbloquear = () => {
+                somContagem.play().catch(() => {});
+                somContagem.pause();
+                somContagem.currentTime = 0;
+                somSorteio.play().catch(() => {});
+                somSorteio.pause();
+                somSorteio.currentTime = 0;
+                document.removeEventListener('click', desbloquear);
+            };
+            document.addEventListener('click', desbloquear);
         });
 
         const cores = ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f', '#9b59b6', '#1abc9c', '#ff6b6b', '#4ecdc4'];
@@ -463,9 +466,11 @@
             const resultadoEl = document.getElementById('resultado');
             
             const contagemIntervalo = setInterval(() => {
-                // ✅ SOM DA CONTAGEM GARANTIDO
-                somContagem.currentTime = 0;
-                somContagem.play().catch(e => console.log("Som contagem:", e));
+                // ✅ SOM DA CONTAGEM FORÇADO
+                if (somContagem) {
+                    somContagem.currentTime = 0;
+                    somContagem.play().catch(e => console.log("Erro som contagem:", e));
+                }
                 
                 resultadoEl.innerHTML = `<div class="contagem">${tempo}</div>`;
                 tempo--;
@@ -483,9 +488,11 @@
 
             enviarParaPlanilha(sorteados.length, participanteSorteado.nome);
 
-            // ✅ SOM DO SORTEIO GARANTIDO
-            somSorteio.currentTime = 0;
-            somSorteio.play().catch(e => console.log("Som sorteio:", e));
+            // ✅ SOM DO SORTEIO FORÇADO
+            if (somSorteio) {
+                somSorteio.currentTime = 0;
+                somSorteio.play().catch(e => console.log("Erro som sorteio:", e));
+            }
 
             document.getElementById('resultado').innerHTML = `
                 <div class="container-sorteado">
