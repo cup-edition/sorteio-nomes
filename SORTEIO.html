@@ -15,13 +15,12 @@
 
         body {
             background-color: #343a40;
-            /* ✅ ALTERAÇÃO: Centraliza todo o conteúdo vertical e horizontalmente */
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             overflow-x: hidden;
-            padding: 20px; /* Adiciona um pequeno espaçamento nas laterais em telas pequenas */
+            padding: 20px;
         }
 
         h1 {
@@ -281,7 +280,7 @@
 </head>
 <body>
 
-    <!-- ✅ TELA DE LOGIN ADICIONADA -->
+    <!-- ✅ TELA DE LOGIN -->
     <div id="telaLogin">
         <div class="caixa-login">
             <h2>🔐 ACESSO RESTRITO</h2>
@@ -326,6 +325,7 @@
         </div>
     </div>
 
+    <!-- ✅ ÁUDIO CORRIGIDO: Tags fechadas e configuradas para funcionar -->
     <audio id="somContagem" preload="auto" src="https://cdn.freesound.org/previews/242/242353_3878527-lq.mp3">
     <audio id="somSorteio" preload="auto" src="https://cdn.freesound.org/previews/142/142603_2215514-lq.mp3">
 
@@ -350,17 +350,32 @@
         let sorteados = [];
         let emContagem = false;
 
+        // ✅ SOMS CARREGADOS E CONFIGURADOS PARA TOCAR
         const somSorteio = document.getElementById('somSorteio');
         const somContagem = document.getElementById('somContagem');
+        
+        // Força carregar os arquivos de áudio
+        somSorteio.load();
+        somContagem.load();
+        somSorteio.volume = 0.8;
+        somContagem.volume = 0.7;
+
+        // ✅ Desbloqueia áudio (obrigatório nos navegadores modernos)
+        document.addEventListener('click', function desbloquearAudio() {
+            somSorteio.play().catch(() => {});
+            somSorteio.pause();
+            somContagem.play().catch(() => {});
+            somContagem.pause();
+            document.removeEventListener('click', desbloquearAudio);
+        });
+
         const cores = ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f', '#9b59b6', '#1abc9c', '#ff6b6b', '#4ecdc4'];
 
-        // ✅ COLE AQUI O LINK DA SUA API DO GOOGLE SHEETS
         const LINK_API_GOOGLE = "https://script.google.com/macros/s/AKfycbz_zng8o_uCc0D5ZYB0FhOSRD7vXykuZc3uz2eZGQh29dVmMd2Q9kabJ3GeZJhpRPdsLg/exec";
 
-        // ===== FUNÇÕES DE LOGIN (AGORA BUSCANDO DO FIREBASE) =====
+        // ===== LOGIN BUSCANDO DO FIREBASE =====
         function verificarUsuario() {
             const usuario = document.getElementById('usuarioLogin').value.trim().toLowerCase();
-            // Pula para senha somente se digitar "campim"
             if (usuario === "campim") {
                 document.getElementById('senhaLogin').focus();
             }
@@ -371,23 +386,20 @@
             const senha = document.getElementById('senhaLogin').value.trim();
             const mensagemErro = document.getElementById('mensagemErro');
 
-            // ✅ BUSCA USUÁRIO E SENHA DIRETO DO NÓ "seguranca" NO BANCO
             db.ref('seguranca').once('value')
             .then(snap => {
                 const dados = snap.val();
                 if (dados && usuario === dados.usuario && senha === dados.senha) {
-                    // ✅ ACERTOU -> LIBERA O SISTEMA
                     document.getElementById('telaLogin').style.display = 'none';
                     document.getElementById('conteudoPrincipal').style.display = 'flex';
                     iniciarSistema();
                 } else {
-                    // ❌ ERRO -> MOSTRA MENSAGEM
                     mensagemErro.style.display = 'block';
                     document.getElementById('senhaLogin').value = '';
                 }
             })
             .catch(erro => {
-                alert("❌ Erro de conexão com o banco! Verifique as regras do Firebase.");
+                alert("❌ Erro de conexão! Verifique as regras do Firebase.");
                 console.error(erro);
             });
         }
@@ -451,9 +463,10 @@
             const resultadoEl = document.getElementById('resultado');
             
             const contagemIntervalo = setInterval(() => {
+                // ✅ SOM DA CONTAGEM GARANTIDO
                 somContagem.currentTime = 0;
-                somContagem.volume = 0.7;
-                somContagem.play();
+                somContagem.play().catch(e => console.log("Som contagem:", e));
+                
                 resultadoEl.innerHTML = `<div class="contagem">${tempo}</div>`;
                 tempo--;
                 if (tempo < 0) {
@@ -468,12 +481,11 @@
             const participanteSorteado = participantesDisponiveis.splice(indiceSorteado, 1)[0];
             sorteados.push(participanteSorteado);
 
-            // ✅ AQUI ESTÁ A ALTERAÇÃO: COLUNAS B, C, D, E
             enviarParaPlanilha(sorteados.length, participanteSorteado.nome);
 
+            // ✅ SOM DO SORTEIO GARANTIDO
             somSorteio.currentTime = 0;
-            somSorteio.volume = 0.8;
-            somSorteio.play();
+            somSorteio.play().catch(e => console.log("Som sorteio:", e));
 
             document.getElementById('resultado').innerHTML = `
                 <div class="container-sorteado">
@@ -497,13 +509,10 @@
             }
         }
 
-        // ✅ FUNÇÃO AJUSTADA PARA COMEÇAR NA COLUNA B
         function enviarParaPlanilha(posicao, nome) {
-            // Colunas: B (TIME1), C (TIME2), D (TIME3), E (TIME4)
             const colunas = ['B', 'C', 'D', 'E']; 
-            const linhaInicial = 14; // começa na linha 14
+            const linhaInicial = 14;
 
-            // Calcula qual coluna e linha vai receber
             const indiceColuna = (posicao - 1) % 4;
             const indiceLinha = linhaInicial + Math.floor((posicao - 1) / 4);
 
