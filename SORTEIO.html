@@ -259,7 +259,7 @@
                 <div>Faltam: <span id="quantidadeFaltam">0</span></div>
             </div>
 
-            <button id="sortearBtn" onclick="sortearNome()">SORTEAR</button>
+            <button id="sortearBtn" onclick="iniciarSorteioAutomatico()">SORTEAR TODOS</button>
             <button onclick="reiniciarSorteio()" class="btn-vermelho">Reiniciar Tudo</button>
 
             <div class="mensagem-final" id="mensagemFinal" style="display: none;">
@@ -295,11 +295,11 @@
         let participantesDisponiveis = [];
         let sorteados = [];
         let emContagem = false;
+        let intervaloAutomatico; // Controla a sequência automática
+        const TEMPO_ENTRE_SORTEIOS = 3000; // ✅ 3 SEGUNDOS DE INTERVALO
 
         // ✅ SOMS CRIADOS COM WEB AUDIO API (100% FUNCIONA, SEM BLOQUEIO)
         let audioContext;
-        let somBipAtivo = false;
-        let somVitoriaAtivo = false;
 
         // ✅ INICIA SOM APENAS DEPOIS DE CLIQUE DO USUÁRIO (REGRA DO NAVEGADOR)
         function iniciarSons() {
@@ -398,7 +398,7 @@
             document.addEventListener('keydown', function(event) {
                 if ((event.code === 'Space' || event.key === ' ') && participantesDisponiveis.length > 0 && !emContagem) {
                     event.preventDefault();
-                    sortearNome();
+                    iniciarSorteioAutomatico();
                 }
             });
         }
@@ -413,35 +413,51 @@
             document.getElementById('quantidadeFaltam').textContent = participantesDisponiveis.length;
         }
 
-        function sortearNome() {
+        // ✅ NOVA FUNÇÃO: INICIA O SORTEIO ATÉ O FIM
+        function iniciarSorteioAutomatico() {
             if (emContagem || participantesDisponiveis.length === 0) return;
-
-            document.getElementById('mensagemFinal').style.display = 'none';
-            emContagem = true;
+            
             document.getElementById('sortearBtn').disabled = true;
+            document.getElementById('mensagemFinal').style.display = 'none';
+            
+            // Função que executa um sorteio e agenda o próximo
+            const executarSequencia = () => {
+                if (participantesDisponiveis.length === 0) {
+                    clearInterval(intervaloAutomatico);
+                    document.getElementById('mensagemFinal').style.display = 'block';
+                    return;
+                }
+                sortearNomeUnico(executarSequencia);
+            };
 
+            executarSequencia(); // Começa o primeiro
+        }
+
+        // ✅ SORTEIO INDIVIDUAL, AGORA COM CALLBACK PARA SABER QUANDO TERMINA
+        function sortearNomeUnico(aoTerminar) {
+            emContagem = true;
             let tempo = 3;
             const resultadoEl = document.getElementById('resultado');
             
             const contagemIntervalo = setInterval(() => {
-                tocarBip(); // ✅ SOM BIP NA CONTAGEM
+                tocarBip();
                 resultadoEl.innerHTML = `<div class="contagem">${tempo}</div>`;
                 tempo--;
                 if (tempo < 0) {
                     clearInterval(contagemIntervalo);
-                    realizarSorteioReal();
+                    realizarSorteioReal(aoTerminar); // Passa a continuação
                 }
             }, 1000);
         }
 
-        function realizarSorteioReal() {
+        function realizarSorteioReal(aoTerminar) {
             const indiceSorteado = Math.floor(Math.random() * participantesDisponiveis.length);
             const participanteSorteado = participantesDisponiveis.splice(indiceSorteado, 1)[0];
             sorteados.push(participanteSorteado);
 
             enviarParaPlanilha(sorteados.length, participanteSorteado.nome);
 
-            tocarVitoria(); // ✅ SOM ANIMADO AQUI, GARANTIDO
+            tocarVitoria();
 
             document.getElementById('resultado').innerHTML = `
                 <div class="container-sorteado">
@@ -456,14 +472,15 @@
             atualizarInfoSorteio();
 
             emContagem = false;
-            
-            if (participantesDisponiveis.length === 0) {
-                document.getElementById('sortearBtn').disabled = true;
-                document.getElementById('mensagemFinal').style.display = 'block';
-            } else {
-                document.getElementById('sortearBtn').disabled = false;
+
+            // ✅ AGUARDA 3 SEGUNDOS ANTES DO PRÓXIMO
+            if (aoTerminar) {
+                setTimeout(aoTerminar, TEMPO_ENTRE_SORTEIOS);
             }
         }
+
+        // Função antiga desativada, agora usamos a automática
+        function sortearNome() { return; }
 
         function enviarParaPlanilha(posicao, nome) {
             const colunas = ['B', 'C', 'D', 'E']; 
@@ -509,6 +526,7 @@
         }
 
         function reiniciarSorteio() {
+            if (intervaloAutomatico) clearInterval(intervaloAutomatico);
             participantesDisponiveis = [...listaOriginal];
             sorteados = [];
             emContagem = false;
