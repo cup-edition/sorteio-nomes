@@ -357,9 +357,10 @@
         // ✅ COLE AQUI O LINK DA SUA API DO GOOGLE SHEETS
         const LINK_API_GOOGLE = "https://script.google.com/macros/s/AKfycbz_zng8o_uCc0D5ZYB0FhOSRD7vXykuZc3uz2eZGQh29dVmMd2Q9kabJ3GeZJhpRPdsLg/exec";
 
-        // ===== FUNÇÕES DE LOGIN =====
+        // ===== FUNÇÕES DE LOGIN (AGORA BUSCANDO DO FIREBASE) =====
         function verificarUsuario() {
-            const usuario = document.getElementById('usuarioLogin').value.trim();
+            const usuario = document.getElementById('usuarioLogin').value.trim().toLowerCase();
+            // Pula para senha somente se digitar "campim"
             if (usuario === "campim") {
                 document.getElementById('senhaLogin').focus();
             }
@@ -370,14 +371,25 @@
             const senha = document.getElementById('senhaLogin').value.trim();
             const mensagemErro = document.getElementById('mensagemErro');
 
-            if (usuario === "campim" && senha === "4262") {
-                document.getElementById('telaLogin').style.display = 'none';
-                document.getElementById('conteudoPrincipal').style.display = 'flex';
-                iniciarSistema();
-            } else {
-                mensagemErro.style.display = 'block';
-                document.getElementById('senhaLogin').value = '';
-            }
+            // ✅ BUSCA USUÁRIO E SENHA DIRETO DO NÓ "seguranca" NO BANCO
+            db.ref('seguranca').once('value')
+            .then(snap => {
+                const dados = snap.val();
+                if (dados && usuario === dados.usuario && senha === dados.senha) {
+                    // ✅ ACERTOU -> LIBERA O SISTEMA
+                    document.getElementById('telaLogin').style.display = 'none';
+                    document.getElementById('conteudoPrincipal').style.display = 'flex';
+                    iniciarSistema();
+                } else {
+                    // ❌ ERRO -> MOSTRA MENSAGEM
+                    mensagemErro.style.display = 'block';
+                    document.getElementById('senhaLogin').value = '';
+                }
+            })
+            .catch(erro => {
+                alert("❌ Erro de conexão com o banco! Verifique as regras do Firebase.");
+                console.error(erro);
+            });
         }
 
         function iniciarSistema() {
