@@ -296,28 +296,53 @@
         let sorteados = [];
         let emContagem = false;
 
-        // ✅ SOMS AGORA GERADOS DIRETAMENTE NO CÓDIGO, SEM LINKS EXTERNOS
-        let somBip;
-        let somVitoria;
+        // ✅ SOMS CRIADOS COM WEB AUDIO API (100% FUNCIONA, SEM BLOQUEIO)
+        let audioContext;
+        let somBipAtivo = false;
+        let somVitoriaAtivo = false;
 
-        window.addEventListener('DOMContentLoaded', () => {
-            // 🎵 SOM 1: Bip curto para contagem
-            somBip = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA");
-            
-            // 🎵 SOM 2: Animado, curto e alegre (som de vitória)
-            somVitoria = new Audio("data:audio/wav;base64,UklGRnoAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgBhACAAsQDCAMwA0gDRAO0A9QH0AfwCDAJ8AqgD0A+0BEQH5A/oC9ALwAqwC9gH0AfwCDAJ8AqgD0A+0BEQH5A/oC9ALwAqwC9gH0AfwCDAJ8AqgD0A+0BEQH5A/oC9ALwAqwC9gH0AfwCDAJ8AqgD0A+0BEQH5A/oC9ALwAqwC9gH0=");
-            
-            somBip.volume = 0.7;
-            somVitoria.volume = 1.0; // Volume máximo para garantir ouvir
+        // ✅ INICIA SOM APENAS DEPOIS DE CLIQUE DO USUÁRIO (REGRA DO NAVEGADOR)
+        function iniciarSons() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
 
-            // Libera os sons
-            const desbloquear = () => {
-                somBip.play().catch(()=>{}); somBip.pause(); somBip.currentTime = 0;
-                somVitoria.play().catch(()=>{}); somVitoria.pause(); somVitoria.currentTime = 0;
-                document.removeEventListener('click', desbloquear);
-            };
-            document.addEventListener('click', desbloquear);
-        });
+        // 🎵 SOM 1: BIP CURTO PARA CONTAGEM
+        function tocarBip() {
+            if (!audioContext) return;
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+            osc.type = 'sine';
+            osc.frequency.value = 880;
+            gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2);
+            osc.start(audioContext.currentTime);
+            osc.stop(audioContext.currentTime + 0.2);
+        }
+
+        // 🎵 SOM 2: ANIMADO, CURTO E ALEGRE PARA O SORTEADO
+        function tocarVitoria() {
+            if (!audioContext) return;
+            const tempo = audioContext.currentTime;
+            const ganho = audioContext.createGain();
+            ganho.connect(audioContext.destination);
+            ganho.gain.setValueAtTime(0.5, tempo);
+            ganho.gain.exponentialRampToValueAtTime(0.001, tempo + 0.4);
+
+            // Notas animadas
+            const notas = [523, 659, 784, 1047];
+            notas.forEach((freq, i) => {
+                const osc = audioContext.createOscillator();
+                osc.connect(ganho);
+                osc.type = 'triangle';
+                osc.frequency.value = freq;
+                osc.start(tempo + (i * 0.08));
+                osc.stop(tempo + (i * 0.08) + 0.25);
+            });
+        }
 
         const cores = ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f', '#9b59b6', '#1abc9c', '#ff6b6b', '#4ecdc4'];
         const LINK_API_GOOGLE = "https://script.google.com/macros/s/AKfycbz_zng8o_uCc0D5ZYB0FhOSRD7vXykuZc3uz2eZGQh29dVmMd2Q9kabJ3GeZJhpRPdsLg/exec";
@@ -339,6 +364,7 @@
                     document.getElementById('telaLogin').style.display = 'none';
                     document.getElementById('conteudoPrincipal').style.display = 'flex';
                     iniciarSistema();
+                    iniciarSons(); // ✅ Libera som aqui após login
                 } else {
                     mensagemErro.style.display = 'block';
                     document.getElementById('senhaLogin').value = '';
@@ -398,8 +424,7 @@
             const resultadoEl = document.getElementById('resultado');
             
             const contagemIntervalo = setInterval(() => {
-                // ✅ SÓ TOCA O BIP AQUI
-                if (somBip) { somBip.currentTime = 0; somBip.play(); }
+                tocarBip(); // ✅ SOM BIP NA CONTAGEM
                 resultadoEl.innerHTML = `<div class="contagem">${tempo}</div>`;
                 tempo--;
                 if (tempo < 0) {
@@ -416,8 +441,7 @@
 
             enviarParaPlanilha(sorteados.length, participanteSorteado.nome);
 
-            // ✅ SOM ANIMADO E GARANTIDO AQUI
-            if (somVitoria) { somVitoria.currentTime = 0; somVitoria.play(); }
+            tocarVitoria(); // ✅ SOM ANIMADO AQUI, GARANTIDO
 
             document.getElementById('resultado').innerHTML = `
                 <div class="container-sorteado">
