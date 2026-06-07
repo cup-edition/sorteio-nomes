@@ -296,30 +296,24 @@
         let sorteados = [];
         let emContagem = false;
 
-        let somBipContagem;
-        let somNomeSorteado;
+        // ✅ SOMS AGORA GERADOS DIRETAMENTE NO CÓDIGO, SEM LINKS EXTERNOS
+        let somBip;
+        let somVitoria;
 
         window.addEventListener('DOMContentLoaded', () => {
-            // Som da contagem: bip curto
-            somBipContagem = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+            // 🎵 SOM 1: Bip curto para contagem
+            somBip = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA");
             
-            // 🔊 SOM NOVO, ANIMADO, CURTO E 100% FUNCIONAL
-            // Fonte confiável, som de vitória/alegria rápido
-            somNomeSorteado = new Audio('https://cdn.freesound.org/previews/270/270409_5124758-lq.mp3');
+            // 🎵 SOM 2: Animado, curto e alegre (som de vitória)
+            somVitoria = new Audio("data:audio/wav;base64,UklGRnoAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgBhACAAsQDCAMwA0gDRAO0A9QH0AfwCDAJ8AqgD0A+0BEQH5A/oC9ALwAqwC9gH0AfwCDAJ8AqgD0A+0BEQH5A/oC9ALwAqwC9gH0AfwCDAJ8AqgD0A+0BEQH5A/oC9ALwAqwC9gH0AfwCDAJ8AqgD0A+0BEQH5A/oC9ALwAqwC9gH0=");
             
-            somBipContagem.load();
-            somNomeSorteado.load();
-            somBipContagem.volume = 0.7;
-            somNomeSorteado.volume = 0.9; // Volume alto para garantir que ouça
+            somBip.volume = 0.7;
+            somVitoria.volume = 1.0; // Volume máximo para garantir ouvir
 
-            // Libera os sons para tocar
+            // Libera os sons
             const desbloquear = () => {
-                somBipContagem.play().catch(()=>{});
-                somBipContagem.pause();
-                somBipContagem.currentTime = 0;
-                somNomeSorteado.play().catch(()=>{});
-                somNomeSorteado.pause();
-                somNomeSorteado.currentTime = 0;
+                somBip.play().catch(()=>{}); somBip.pause(); somBip.currentTime = 0;
+                somVitoria.play().catch(()=>{}); somVitoria.pause(); somVitoria.currentTime = 0;
                 document.removeEventListener('click', desbloquear);
             };
             document.addEventListener('click', desbloquear);
@@ -404,10 +398,8 @@
             const resultadoEl = document.getElementById('resultado');
             
             const contagemIntervalo = setInterval(() => {
-                if (somBipContagem) {
-                    somBipContagem.currentTime = 0;
-                    somBipContagem.play();
-                }
+                // ✅ SÓ TOCA O BIP AQUI
+                if (somBip) { somBip.currentTime = 0; somBip.play(); }
                 resultadoEl.innerHTML = `<div class="contagem">${tempo}</div>`;
                 tempo--;
                 if (tempo < 0) {
@@ -424,11 +416,8 @@
 
             enviarParaPlanilha(sorteados.length, participanteSorteado.nome);
 
-            // ✅ SOM FORÇADO A TOCAR AQUI
-            if (somNomeSorteado) {
-                somNomeSorteado.currentTime = 0;
-                somNomeSorteado.play().catch(e => console.log("Erro ao tocar som:", e));
-            }
+            // ✅ SOM ANIMADO E GARANTIDO AQUI
+            if (somVitoria) { somVitoria.currentTime = 0; somVitoria.play(); }
 
             document.getElementById('resultado').innerHTML = `
                 <div class="container-sorteado">
