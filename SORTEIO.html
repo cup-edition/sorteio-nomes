@@ -346,16 +346,17 @@
         let sorteados = [];
         let emContagem = false;
 
-        // ✅ SOMS SEPARADOS CONFORME VOCÊ PEDIU:
-        let somBipContagem;   // Som pequeno (bip) → SÓ na contagem 3,2,1
-        let somNomeSorteado;  // Som diferente → SÓ quando o nome aparecer
+        // ✅ SOMS SEPARADOS E CORRIGIDOS:
+        let somBipContagem;   // SÓ bip curto (3,2,1) ✅
+        let somNomeSorteado;  // SÓ som de vitória, SEM BIP ✅
 
         // ✅ CARREGA TUDO AO ABRIR
         window.addEventListener('DOMContentLoaded', () => {
-            // Som 1: Bip curto para os números da contagem
+            // Som 1: Bip pequeno e curto (apenas na contagem)
             somBipContagem = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-            // Som 2: Som diferente para quando o nome aparecer
-            somNomeSorteado = new Audio('https://actions.google.com/sounds/v1/alarms/electronic_alarm.ogg');
+            
+            // Som 2: Som de vitória/festa (NOVO, SEM BIP NO COMEÇO)
+            somNomeSorteado = new Audio('https://actions.google.com/sounds/v1/cartoon/siren_whistle.ogg');
             
             somBipContagem.load();
             somNomeSorteado.load();
@@ -491,7 +492,7 @@
 
             enviarParaPlanilha(sorteados.length, participanteSorteado.nome);
 
-            // ✅ SOM DIFERENTE AQUI, SÓ QUANDO O NOME APARECE
+            // ✅ SOM DIFERENTE AQUI, SEM BIP NO INÍCIO
             if (somNomeSorteado) {
                 somNomeSorteado.currentTime = 0;
                 somNomeSorteado.play();
