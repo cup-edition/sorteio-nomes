@@ -346,28 +346,30 @@
         let sorteados = [];
         let emContagem = false;
 
-        // ✅ LINKS DE SOM NOVOS E CONFIÁVEIS (funcionam em qualquer navegador)
-        let somContagem, somSorteio;
+        // ✅ SOMS SEPARADOS CONFORME VOCÊ PEDIU:
+        let somBipContagem;   // Som pequeno (bip) → SÓ na contagem 3,2,1
+        let somNomeSorteado;  // Som diferente → SÓ quando o nome aparecer
 
         // ✅ CARREGA TUDO AO ABRIR
         window.addEventListener('DOMContentLoaded', () => {
-            // Sons de outra fonte, sem bloqueio
-            somContagem = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-            somSorteio = new Audio('https://actions.google.com/sounds/v1/alarms/digital_watch_alarm.ogg');
+            // Som 1: Bip curto para os números da contagem
+            somBipContagem = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+            // Som 2: Som diferente para quando o nome aparecer
+            somNomeSorteado = new Audio('https://actions.google.com/sounds/v1/alarms/electronic_alarm.ogg');
             
-            somContagem.load();
-            somSorteio.load();
-            somContagem.volume = 0.8;
-            somSorteio.volume = 0.8;
+            somBipContagem.load();
+            somNomeSorteado.load();
+            somBipContagem.volume = 0.7;
+            somNomeSorteado.volume = 0.8;
 
             // ✅ LIBERA SOM OBRIGATORIAMENTE
             const desbloquear = () => {
-                somContagem.play().catch(()=>{});
-                somContagem.pause();
-                somContagem.currentTime = 0;
-                somSorteio.play().catch(()=>{});
-                somSorteio.pause();
-                somSorteio.currentTime = 0;
+                somBipContagem.play().catch(()=>{});
+                somBipContagem.pause();
+                somBipContagem.currentTime = 0;
+                somNomeSorteado.play().catch(()=>{});
+                somNomeSorteado.pause();
+                somNomeSorteado.currentTime = 0;
                 document.removeEventListener('click', desbloquear);
             };
             document.addEventListener('click', desbloquear);
@@ -467,10 +469,10 @@
             const resultadoEl = document.getElementById('resultado');
             
             const contagemIntervalo = setInterval(() => {
-                // ✅ SOM DA CONTAGEM FORÇADO
-                if (somContagem) {
-                    somContagem.currentTime = 0;
-                    somContagem.play();
+                // ✅ SÓ TOCA O BIP AQUI, NOS NÚMEROS
+                if (somBipContagem) {
+                    somBipContagem.currentTime = 0;
+                    somBipContagem.play();
                 }
                 
                 resultadoEl.innerHTML = `<div class="contagem">${tempo}</div>`;
@@ -489,10 +491,10 @@
 
             enviarParaPlanilha(sorteados.length, participanteSorteado.nome);
 
-            // ✅ SOM DO SORTEIO FORÇADO
-            if (somSorteio) {
-                somSorteio.currentTime = 0;
-                somSorteio.play();
+            // ✅ SOM DIFERENTE AQUI, SÓ QUANDO O NOME APARECE
+            if (somNomeSorteado) {
+                somNomeSorteado.currentTime = 0;
+                somNomeSorteado.play();
             }
 
             document.getElementById('resultado').innerHTML = `
