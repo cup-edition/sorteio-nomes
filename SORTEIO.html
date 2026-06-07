@@ -346,25 +346,26 @@
         let sorteados = [];
         let emContagem = false;
 
-        // ✅ SOMS CRIADOS DIRETAMENTE NO JAVASCRIPT (MAIS CONFIÁVEL)
+        // ✅ LINKS DE SOM NOVOS E CONFIÁVEIS (funcionam em qualquer navegador)
         let somContagem, somSorteio;
 
-        // ✅ CARREGA OS SONS ASSIM QUE A PÁGINA ABRE
+        // ✅ CARREGA TUDO AO ABRIR
         window.addEventListener('DOMContentLoaded', () => {
-            somContagem = new Audio('https://cdn.freesound.org/previews/242/242353_3878527-lq.mp3');
-            somSorteio = new Audio('https://cdn.freesound.org/previews/142/142603_2215514-lq.mp3');
+            // Sons de outra fonte, sem bloqueio
+            somContagem = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+            somSorteio = new Audio('https://actions.google.com/sounds/v1/alarms/digital_watch_alarm.ogg');
             
             somContagem.load();
             somSorteio.load();
-            somContagem.volume = 0.7;
+            somContagem.volume = 0.8;
             somSorteio.volume = 0.8;
 
-            // ✅ TRUQUE OBRIGATÓRIO PARA NAVEGADORES PERMITIREM SOM
+            // ✅ LIBERA SOM OBRIGATORIAMENTE
             const desbloquear = () => {
-                somContagem.play().catch(() => {});
+                somContagem.play().catch(()=>{});
                 somContagem.pause();
                 somContagem.currentTime = 0;
-                somSorteio.play().catch(() => {});
+                somSorteio.play().catch(()=>{});
                 somSorteio.pause();
                 somSorteio.currentTime = 0;
                 document.removeEventListener('click', desbloquear);
@@ -469,7 +470,7 @@
                 // ✅ SOM DA CONTAGEM FORÇADO
                 if (somContagem) {
                     somContagem.currentTime = 0;
-                    somContagem.play().catch(e => console.log("Erro som contagem:", e));
+                    somContagem.play();
                 }
                 
                 resultadoEl.innerHTML = `<div class="contagem">${tempo}</div>`;
@@ -491,7 +492,7 @@
             // ✅ SOM DO SORTEIO FORÇADO
             if (somSorteio) {
                 somSorteio.currentTime = 0;
-                somSorteio.play().catch(e => console.log("Erro som sorteio:", e));
+                somSorteio.play();
             }
 
             document.getElementById('resultado').innerHTML = `
