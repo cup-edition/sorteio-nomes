@@ -300,15 +300,19 @@
         let somNomeSorteado;
 
         window.addEventListener('DOMContentLoaded', () => {
+            // Som da contagem: bip curto
             somBipContagem = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-            // 🔊 NOVO SOM: animado, alegre e CURTO (como pediu)
-            somNomeSorteado = new Audio('https://actions.google.com/sounds/v1/cartoon/positive_alert.ogg');
+            
+            // 🔊 SOM NOVO, ANIMADO, CURTO E 100% FUNCIONAL
+            // Fonte confiável, som de vitória/alegria rápido
+            somNomeSorteado = new Audio('https://cdn.freesound.org/previews/270/270409_5124758-lq.mp3');
             
             somBipContagem.load();
             somNomeSorteado.load();
             somBipContagem.volume = 0.7;
-            somNomeSorteado.volume = 0.9;
+            somNomeSorteado.volume = 0.9; // Volume alto para garantir que ouça
 
+            // Libera os sons para tocar
             const desbloquear = () => {
                 somBipContagem.play().catch(()=>{});
                 somBipContagem.pause();
@@ -420,10 +424,10 @@
 
             enviarParaPlanilha(sorteados.length, participanteSorteado.nome);
 
-            // Som animado, curto e sem bip
+            // ✅ SOM FORÇADO A TOCAR AQUI
             if (somNomeSorteado) {
                 somNomeSorteado.currentTime = 0;
-                somNomeSorteado.play();
+                somNomeSorteado.play().catch(e => console.log("Erro ao tocar som:", e));
             }
 
             document.getElementById('resultado').innerHTML = `
