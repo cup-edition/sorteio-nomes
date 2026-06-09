@@ -230,6 +230,39 @@
             display: none; width: 100%; display: flex; justify-content: center; align-items: center; flex-direction: column;
         }
     </style>
+
+    <!-- BLOQUEIO DE ATALHOS E BOTÃO DIREITO -->
+    <script>
+        // Bloqueia o botão direito do mouse
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+
+        // Bloqueia atalhos de teclado para ver código
+        document.addEventListener('keydown', function(e) {
+            // F12
+            if (e.key === 'F12' || e.keyCode === 123) {
+                e.preventDefault();
+                return false;
+            }
+
+            // Ctrl+U, Ctrl+S, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+C, Ctrl+V
+            if (e.ctrlKey && (
+                e.key === 'u' || e.key === 's' || e.key === 'c' || e.key === 'v' ||
+                (e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'i' || e.key === 'j'))
+            )) {
+                e.preventDefault();
+                return false;
+            }
+
+            // Ctrl+U (para outros navegadores)
+            if (e.ctrlKey && e.keyCode === 85) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    </script>
 </head>
 <body>
 
