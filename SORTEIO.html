@@ -218,13 +218,20 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); display: flex; align-items: center; justify-content: center; z-index: 9999;
         }
         .caixa-login {
-            background: white; padding: 40px 30px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); width: 100%; max-width: 350px; text-align: center;
+            /* Cor alterada para cinza escuro */
+            background: #2d3142; 
+            padding: 40px 30px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.4); width: 100%; max-width: 350px; text-align: center;
         }
-        .caixa-login h2 {color: #2c3e50; margin-bottom: 20px; font-size: 22px;}
-        .caixa-login input {width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; font-size: 15px;}
+        .caixa-login h2 {
+            /* Cor do texto alterada para branco */
+            color: #ffffff; 
+            margin-bottom: 20px; font-size: 22px;
+        }
+        .caixa-login input {width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #4f546c; border-radius: 6px; font-size: 15px; background-color: #1f2233; color: #ffffff;}
+        .caixa-login input::placeholder {color: #b8b8d1;}
         .caixa-login button {width: 100%; padding: 12px; background-color: #27ae60; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: background 0.2s;}
         .caixa-login button:hover {background-color: #219653;}
-        .errologin {color: #e74c3c; font-size: 14px; margin-top: 10px; display: none; font-weight: bold;}
+        .errologin {color: #ff6b6b; font-size: 14px; margin-top: 10px; display: none; font-weight: bold;}
 
         #conteudoPrincipal {
             display: none; width: 100%; display: flex; justify-content: center; align-items: center; flex-direction: column;
