@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SORTEIO CUP EDITION</title>
+    <link rel="icon" type="image/png" href="https://endrilsilva.github.io/sistema-inscricoes/CUP%20EDITION.png">
+    
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase.js"></script>
     <style>
         * {
@@ -218,12 +220,10 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); display: flex; align-items: center; justify-content: center; z-index: 9999;
         }
         .caixa-login {
-            /* Cor alterada para cinza escuro */
             background: #2d3142; 
             padding: 40px 30px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.4); width: 100%; max-width: 350px; text-align: center;
         }
         .caixa-login h2 {
-            /* Cor do texto alterada para branco */
             color: #ffffff; 
             margin-bottom: 20px; font-size: 22px;
         }
@@ -238,23 +238,18 @@
         }
     </style>
 
-    <!-- BLOQUEIO DE ATALHOS E BOTÃO DIREITO -->
     <script>
-        // Bloqueia o botão direito do mouse
         document.addEventListener('contextmenu', function(e) {
             e.preventDefault();
             return false;
         });
 
-        // Bloqueia atalhos de teclado para ver código
         document.addEventListener('keydown', function(e) {
-            // F12
             if (e.key === 'F12' || e.keyCode === 123) {
                 e.preventDefault();
                 return false;
             }
 
-            // Ctrl+U, Ctrl+S, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+C, Ctrl+V
             if (e.ctrlKey && (
                 e.key === 'u' || e.key === 's' || e.key === 'c' || e.key === 'v' ||
                 (e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'i' || e.key === 'j'))
@@ -263,7 +258,6 @@
                 return false;
             }
 
-            // Ctrl+U (para outros navegadores)
             if (e.ctrlKey && e.keyCode === 85) {
                 e.preventDefault();
                 return false;
@@ -335,20 +329,17 @@
         let participantesDisponiveis = [];
         let sorteados = [];
         let emContagem = false;
-        let intervaloAutomatico; // Controla a sequência automática
-        const TEMPO_ENTRE_SORTEIOS = 3000; // ✅ 3 SEGUNDOS DE INTERVALO
+        let intervaloAutomatico;
+        const TEMPO_ENTRE_SORTEIOS = 3000;
 
-        // ✅ SOMS CRIADOS COM WEB AUDIO API (100% FUNCIONA, SEM BLOQUEIO)
         let audioContext;
 
-        // ✅ INICIA SOM APENAS DEPOIS DE CLIQUE DO USUÁRIO (REGRA DO NAVEGADOR)
         function iniciarSons() {
             if (!audioContext) {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
             }
         }
 
-        // 🎵 SOM 1: BIP CURTO PARA CONTAGEM
         function tocarBip() {
             if (!audioContext) return;
             const osc = audioContext.createOscillator();
@@ -363,7 +354,6 @@
             osc.stop(audioContext.currentTime + 0.2);
         }
 
-        // 🎵 SOM 2: ANIMADO, CURTO E ALEGRE PARA O SORTEADO
         function tocarVitoria() {
             if (!audioContext) return;
             const tempo = audioContext.currentTime;
@@ -372,7 +362,6 @@
             ganho.gain.setValueAtTime(0.5, tempo);
             ganho.gain.exponentialRampToValueAtTime(0.001, tempo + 0.4);
 
-            // Notas animadas
             const notas = [523, 659, 784, 1047];
             notas.forEach((freq, i) => {
                 const osc = audioContext.createOscillator();
@@ -404,7 +393,7 @@
                     document.getElementById('telaLogin').style.display = 'none';
                     document.getElementById('conteudoPrincipal').style.display = 'flex';
                     iniciarSistema();
-                    iniciarSons(); // ✅ Libera som aqui após login
+                    iniciarSons();
                 } else {
                     mensagemErro.style.display = 'block';
                     document.getElementById('senhaLogin').value = '';
@@ -453,14 +442,12 @@
             document.getElementById('quantidadeFaltam').textContent = participantesDisponiveis.length;
         }
 
-        // ✅ NOVA FUNÇÃO: INICIA O SORTEIO ATÉ O FIM
         function iniciarSorteioAutomatico() {
             if (emContagem || participantesDisponiveis.length === 0) return;
             
             document.getElementById('sortearBtn').disabled = true;
             document.getElementById('mensagemFinal').style.display = 'none';
             
-            // Função que executa um sorteio e agenda o próximo
             const executarSequencia = () => {
                 if (participantesDisponiveis.length === 0) {
                     clearInterval(intervaloAutomatico);
@@ -470,10 +457,9 @@
                 sortearNomeUnico(executarSequencia);
             };
 
-            executarSequencia(); // Começa o primeiro
+            executarSequencia();
         }
 
-        // ✅ SORTEIO INDIVIDUAL, AGORA COM CALLBACK PARA SABER QUANDO TERMINA
         function sortearNomeUnico(aoTerminar) {
             emContagem = true;
             let tempo = 3;
@@ -485,7 +471,7 @@
                 tempo--;
                 if (tempo < 0) {
                     clearInterval(contagemIntervalo);
-                    realizarSorteioReal(aoTerminar); // Passa a continuação
+                    realizarSorteioReal(aoTerminar);
                 }
             }, 1000);
         }
@@ -513,13 +499,11 @@
 
             emContagem = false;
 
-            // ✅ AGUARDA 3 SEGUNDOS ANTES DO PRÓXIMO
             if (aoTerminar) {
                 setTimeout(aoTerminar, TEMPO_ENTRE_SORTEIOS);
             }
         }
 
-        // Função antiga desativada, agora usamos a automática
         function sortearNome() { return; }
 
         function enviarParaPlanilha(posicao, nome) {
