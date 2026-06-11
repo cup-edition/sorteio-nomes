@@ -24,6 +24,7 @@
             overflow-x: hidden;
             padding: 20px;
             padding-top: 20px;
+            gap: 25px;
         }
 
         .container {
@@ -31,10 +32,11 @@
             padding: 20px 30px 30px 30px;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            width: 100%;
+            width: 500px;
             max-width: 500px;
             position: relative;
             z-index: 1;
+            flex-shrink: 0;
         }
 
         .imagem-campim {
@@ -56,7 +58,6 @@
             margin-bottom: 8px;
             color: #f8f9fa;
             font-weight: bold;
-            /* ✅ TEXTO EM MAIÚSCULO */
             text-transform: uppercase;
         }
 
@@ -68,10 +69,9 @@
             font-style: italic;
         }
 
-        /* ✅ CAIXA COM TAMANHO ORIGINAL, SEM BARRA DE ROLAGEM */
         .caixa-nomes {
             width: 100%;
-            height: 120px; /* Mantive o tamanho exato */
+            height: 120px;
             padding: 10px 12px;
             border: 2px solid #6c757d;
             border-radius: 8px;
@@ -79,14 +79,13 @@
             line-height: 16px;
             background-color: #212529;
             color: #f8f9fa;
-            overflow: hidden; /* Sem barra de rolagem */
+            overflow: hidden;
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
             gap: 0;
             position: relative;
         }
 
-        /* ✅ LINHAS VERTICAIS ENTRE AS COLUNAS */
         .caixa-nomes::before,
         .caixa-nomes::after {
             content: '';
@@ -124,7 +123,6 @@
             display: none;
         }
 
-        /* ✅ MENSAGEM APENAS POR CIMA DO BOTÃO SORTEAR TODOS, MESMO TAMANHO */
         .mensagem-final {
             position: absolute;
             top: 0;
@@ -242,6 +240,7 @@
 
         .lista-sorteados {
             margin-top: 20px;
+            margin-bottom: 25px;
         }
 
         .lista-sorteados h3 {
@@ -259,6 +258,60 @@
 
         .foto-lista {
             width: 1.8em; height: 1.8em; border-radius: 50%; object-fit: cover; border: 1px solid #ddd;
+        }
+
+        /* === TABELA - CONFIGURAÇÕES CORRETAS === */
+        .planilha-exibicao {
+            padding: 0;
+            border-radius: 8px;
+            overflow: visible;
+            border: 2px solid #000;
+            background-color: #fff;
+            align-self: flex-start;
+            width: auto;
+            flex-shrink: 0;
+        }
+
+        .tabela-times {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .tabela-times th {
+            background-color: #ffd900;
+            border: 1px solid #000;
+            padding: 12px 22px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+            color: #000;
+            white-space: nowrap;
+            min-width: 160px;
+            line-height: 1.3;
+        }
+
+        .linha-separadora {
+            border-top: 1.5px solid #000;
+            margin: 6px 0;
+            width: 100%;
+        }
+
+        .escudo {
+            height: 85px;
+            margin: 8px auto 0 auto;
+            display: block;
+            object-fit: contain;
+        }
+
+        .tabela-times td {
+            background-color: #00e5ee;
+            border: 1px solid #000;
+            height: 45px;
+            min-width: 160px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: #000;
         }
 
         .confete {
@@ -297,16 +350,21 @@
         .errologin {color: #ff6b6b; font-size: 14px; margin-top: 10px; display: none; font-weight: bold;}
 
         #conteudoPrincipal {
-            display: none; width: 100%; max-width: 500px; margin: 0 auto; flex-direction: column;
+            display: none; 
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 25px;
+            max-width: 100%;
+            margin: 0 auto;
         }
 
-        @media (max-width: 480px) {
-            .imagem-campim {
-                max-width: 260px;
-                margin-bottom: 15px;
+        @media (max-width: 768px) {
+            #conteudoPrincipal {
+                flex-direction: column;
             }
-            body {
-                padding-top: 10px;
+            .container {
+                width: 100%;
+                max-width: 500px;
             }
         }
     </style>
@@ -322,15 +380,10 @@
                 e.preventDefault();
                 return false;
             }
-
-            if (e.ctrlKey && (
-                e.key === 'u' || e.key === 's' || e.key === 'c' || e.key === 'v' ||
-                (e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'i' || e.key === 'j'))
-            )) {
+            if (e.ctrlKey && (e.key === 'u' || e.key === 's' || e.key === 'c' || e.key === 'v' || (e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'i' || e.key === 'j')))) {
                 e.preventDefault();
                 return false;
             }
-
             if (e.ctrlKey && e.keyCode === 85) {
                 e.preventDefault();
                 return false;
@@ -351,14 +404,52 @@
     </div>
 
     <div id="conteudoPrincipal">
+        <div class="planilha-exibicao">
+            <table class="tabela-times">
+                <thead>
+                    <tr>
+                        <th>
+                            TIME 1
+                            <div class="linha-separadora"></div>
+                            BARCELONA
+                            <img class="escudo" src="https://cup-edition.github.io/sorteio-nomes/BARCELONA.png" alt="BARCELONA">
+                        </th>
+                        <th>
+                            TIME 2
+                            <div class="linha-separadora"></div>
+                            REAL MADRID
+                            <img class="escudo" src="https://cup-edition.github.io/sorteio-nomes/REAL%20MADRID.png" alt="REAL MADRID">
+                        </th>
+                        <th>
+                            TIME 3
+                            <div class="linha-separadora"></div>
+                            PSG
+                            <img class="escudo" src="https://cup-edition.github.io/sorteio-nomes/PSG.png" alt="PSG">
+                        </th>
+                        <th>
+                            TIME 4
+                            <div class="linha-separadora"></div>
+                            LIVERPOOL
+                            <img class="escudo" src="https://cup-edition.github.io/sorteio-nomes/LIVERPOOL.png" alt="LIVERPOOL">
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td id="b14"></td><td id="c14"></td><td id="d14"></td><td id="e14"></td></tr>
+                    <tr><td id="b15"></td><td id="c15"></td><td id="d15"></td><td id="e15"></td></tr>
+                    <tr><td id="b16"></td><td id="c16"></td><td id="d16"></td><td id="e16"></td></tr>
+                    <tr><td id="b17"></td><td id="c17"></td><td id="d17"></td><td id="e17"></td></tr>
+                </tbody>
+            </table>
+        </div>
+
         <div class="container">
             <img src="https://cup-edition.github.io/sistema-inscricoes/CUP%20EDITION%20CAMPIM%20FC.png" alt="CUP EDITION CAMPIM FC" class="imagem-campim">
 
             <div class="aviso-atualizacao">🔄 Lista atualizada automaticamente com os inscritos confirmados</div>
         
             <div class="input-area">
-                <!-- ✅ TEXTO JÁ EM MAIÚSCULO -->
-                <label for="nomes">📋 nomes dos confirmados:</label>
+                <label for="nomes">📋 NOMES DOS CONFIRMADOS:</label>
                 <div class="caixa-nomes" id="caixaNomes">
                     <div class="coluna" id="coluna1"></div>
                     <div class="coluna" id="coluna2"></div>
@@ -382,13 +473,14 @@
             </div>
 
             <div class="lista-sorteados">
-                <h3>Nomes já sorteados:</h3>
+                <h3>NOMES JÁ SORTEADOS:</h3>
                 <ul id="listaSorteados"></ul>
             </div>
         </div>
     </div>
 
     <script>
+        // CONFIGURAÇÃO DO FIREBASE CORRETA
         var firebaseConfig = {
             apiKey: "AIzaSyAR--VWkuPUBzKtJlEHPXnwBwbapB8JY_w",
             authDomain: "sistema-inscricoes-e9241.firebaseapp.com",
@@ -409,10 +501,37 @@
         let intervaloAutomatico;
         let contagemIntervalo;
         const TEMPO_ENTRE_SORTEIOS = 3000;
-        // ✅ VOLTEI PARA 6 NOMES POR COLUNA
         const NOMES_POR_COLUNA = 6;
 
         let audioContext;
+        const cores = ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f', '#9b59b6', '#1abc9c', '#ff6b6b', '#4ecdc4'];
+        const LINK_API_GOOGLE = "https://script.google.com/macros/s/AKfycbz_zng8o_uCc0D5ZYB0FhOSRD7vXykuZc3uz2eZGQh29dVmMd2Q9kabJ3GeZJhpRPdsLg/exec";
+
+        function verificarUsuario() {
+            const usuario = document.getElementById('usuarioLogin').value.trim().toLowerCase();
+            if (usuario === "campim") { document.getElementById('senhaLogin').focus(); }
+        }
+
+        function fazerLogin() {
+            const usuario = document.getElementById('usuarioLogin').value.trim();
+            const senha = document.getElementById('senhaLogin').value.trim();
+            const mensagemErro = document.getElementById('mensagemErro');
+
+            db.ref('seguranca').once('value')
+            .then(snap => {
+                const dados = snap.val();
+                if (dados && usuario === dados.usuario && senha === dados.senha) {
+                    document.getElementById('telaLogin').style.display = 'none';
+                    document.getElementById('conteudoPrincipal').style.display = 'flex';
+                    iniciarSistema();
+                    iniciarSons();
+                } else {
+                    mensagemErro.style.display = 'block';
+                    document.getElementById('senhaLogin').value = '';
+                }
+            })
+            .catch(erro => { alert("❌ Erro de conexão!"); console.error(erro); });
+        }
 
         function iniciarSons() {
             if (!audioContext) {
@@ -453,50 +572,23 @@
             });
         }
 
-        const cores = ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f', '#9b59b6', '#1abc9c', '#ff6b6b', '#4ecdc4'];
-        const LINK_API_GOOGLE = "https://script.google.com/macros/s/AKfycbz_zng8o_uCc0D5ZYB0FhOSRD7vXykuZc3uz2eZGQh29dVmMd2Q9kabJ3GeZJhpRPdsLg/exec";
-
-        function verificarUsuario() {
-            const usuario = document.getElementById('usuarioLogin').value.trim().toLowerCase();
-            if (usuario === "campim") { document.getElementById('senhaLogin').focus(); }
-        }
-
-        function fazerLogin() {
-            const usuario = document.getElementById('usuarioLogin').value.trim();
-            const senha = document.getElementById('senhaLogin').value.trim();
-            const mensagemErro = document.getElementById('mensagemErro');
-
-            db.ref('seguranca').once('value')
-            .then(snap => {
-                const dados = snap.val();
-                if (dados && usuario === dados.usuario && senha === dados.senha) {
-                    document.getElementById('telaLogin').style.display = 'none';
-                    document.getElementById('conteudoPrincipal').style.display = 'flex';
-                    iniciarSistema();
-                    iniciarSons();
-                } else {
-                    mensagemErro.style.display = 'block';
-                    document.getElementById('senhaLogin').value = '';
-                }
-            })
-            .catch(erro => { alert("❌ Erro de conexão!"); console.error(erro); });
-        }
-
+        // ✅ FUNÇÃO PRINCIPAL CORRIGIDA - CARREGA OS DADOS CERTO
         function iniciarSistema() {
             db.ref('inscricoes').on('value', function(snapshot) {
                 const todasInscricoes = [];
                 snapshot.forEach(item => {
                     const dados = item.val();
-                    if (dados && dados.status === 'confirmado') {
+                    // ✅ ESTRUTURA CORRIGIDA: GARANTE QUE NOME E FOTO EXISTAM
+                    if (dados && dados.status === 'confirmado' && dados.nome) {
                         todasInscricoes.push({
                             nome: dados.nome,
-                            foto: dados.foto || 'https://via.placeholder.com/180?text=Sem+Foto'
+                            foto: dados.foto || 'https://via.placeholder.com/180/333/fff?text=SEM+FOTO'
                         });
                     }
                 });
 
                 listaOriginal = todasInscricoes.sort((a, b) => a.nome.localeCompare(b.nome));
-                if (!emContagem) participantesDisponiveis = [...listaOriginal];
+                participantesDisponiveis = [...listaOriginal];
 
                 atualizarCaixaNomes();
                 document.getElementById('totalNomes').textContent = listaOriginal.length;
@@ -573,15 +665,26 @@
             }, 1000);
         }
 
+        // ✅ SORTEIO CORRIGIDO: NÃO DEIXA FICAR UNDEFINED
         function realizarSorteioReal(aoTerminar) {
             const indiceSorteado = Math.floor(Math.random() * participantesDisponiveis.length);
             const participanteSorteado = participantesDisponiveis.splice(indiceSorteado, 1)[0];
+            
+            // ✅ SEGURANÇA EXTRA: SE POR ACASO NÃO TIVER DADOS, INTERROMPE
+            if (!participanteSorteado || !participanteSorteado.nome) {
+                emContagem = false;
+                if (aoTerminar) aoTerminar();
+                return;
+            }
+
             sorteados.push(participanteSorteado);
 
+            preencherCelula(sorteados.length, participanteSorteado.nome);
             enviarParaPlanilha(sorteados.length, participanteSorteado.nome);
 
             tocarVitoria();
 
+            // ✅ EXIBIÇÃO CORRETA
             document.getElementById('resultado').innerHTML = `
                 <div class="container-sorteado">
                     <img src="${participanteSorteado.foto}" alt="Foto do sorteado" class="foto-sorteado">
@@ -600,7 +703,14 @@
             }
         }
 
-        function sortearNome() { return; }
+        function preencherCelula(posicao, nome) {
+            const colunas = ['b', 'c', 'd', 'e']; 
+            const linhaInicial = 14;
+            const indiceColuna = (posicao - 1) % 4;
+            const indiceLinha = linhaInicial + Math.floor((posicao - 1) / 4);
+            const idCelula = colunas[indiceColuna] + indiceLinha;
+            document.getElementById(idCelula).textContent = nome;
+        }
 
         function enviarParaPlanilha(posicao, nome) {
             const colunas = ['B', 'C', 'D', 'E']; 
@@ -611,7 +721,7 @@
 
             fetch(`${LINK_API_GOOGLE}?celula=${celula}&nome=${encodeURIComponent(nome)}`)
                 .then(res => res.json())
-                .then(dados => { if(dados.sucesso) console.log("Salvo na planilha!"); })
+                .then(dados => { if(dados.sucesso) console.log("Salvo na planilha Google!"); })
                 .catch(err => console.error("Falha:", err));
         }
 
@@ -630,6 +740,7 @@
             }
         }
 
+        // ✅ LISTA DE SORTEADOS CORRIGIDA
         function atualizarListaSorteados() {
             const lista = document.getElementById('listaSorteados');
             lista.innerHTML = '';
@@ -653,6 +764,9 @@
             participantesDisponiveis = [...listaOriginal];
             sorteados = [];
             
+            const celulas = document.querySelectorAll('.tabela-times td');
+            celulas.forEach(td => td.textContent = '');
+
             atualizarCaixaNomes();
             document.getElementById('resultado').innerHTML = '<p style="font-size:18px; color:#ced4da;">Pronto para novo sorteio!</p>';
             document.getElementById('listaSorteados').innerHTML = '';
