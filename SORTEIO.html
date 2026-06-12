@@ -222,7 +222,7 @@
             border-radius: 50%;
             object-fit: cover;
             border: 1px solid #27ae60;
-            box-shadow: 0 0 20px rgba(39, 174, 96, 0.5);
+            box-shadow: 0 0 200px rgba(39, 174, 96, 0.5);
         }
 
         .nome-sorteado {
@@ -515,7 +515,7 @@
         function fazerLogin() {
             const usuario = document.getElementById('usuarioLogin').value.trim();
             const senha = document.getElementById('senhaLogin').value.trim();
-            const mensagemErro = document.getElementById('mensagemErro');
+            const mensajeErro = document.getElementById('mensagemErro');
 
             db.ref('seguranca').once('value')
             .then(snap => {
@@ -526,7 +526,7 @@
                     iniciarSistema();
                     iniciarSons();
                 } else {
-                    mensagemErro.style.display = 'block';
+                    mensajeErro.style.display = 'block';
                     document.getElementById('senhaLogin').value = '';
                 }
             })
@@ -572,13 +572,12 @@
             });
         }
 
-        // ✅ FUNÇÃO PRINCIPAL CORRIGIDA - CARREGA OS DADOS CERTO
+        // ✅ FUNÇÃO PRINCIPAL CARREGA OS DADOS CERTO
         function iniciarSistema() {
             db.ref('inscricoes').on('value', function(snapshot) {
                 const todasInscricoes = [];
                 snapshot.forEach(item => {
                     const dados = item.val();
-                    // ✅ ESTRUTURA CORRIGIDA: GARANTE QUE NOME E FOTO EXISTAM
                     if (dados && dados.status === 'confirmado' && dados.nome) {
                         todasInscricoes.push({
                             nome: dados.nome,
@@ -617,6 +616,7 @@
             participantesDisponiveis.forEach((participante, indice) => {
                 const elemento = document.createElement('div');
                 elemento.className = 'linha-nome';
+                // ✅ FIX: Mudado de participant.nome para participante.nome para os nomes voltarem a aparecer
                 elemento.textContent = participante.nome;
 
                 if (indice < NOMES_POR_COLUNA) {
@@ -660,17 +660,40 @@
                 tempo--;
                 if (tempo < 0) {
                     clearInterval(contagemIntervalo);
-                    realizarSorteioReal(aoTerminar);
+                    executarEfeitoEmbaralhar(aoTerminar);
                 }
             }, 1000);
         }
 
-        // ✅ SORTEIO CORRIGIDO: NÃO DEIXA FICAR UNDEFINED
+        // ✅ ANIMAÇÃO EXCLUSIVA DE EMBARALHAMENTO RÁPIDO (SUGESTÃO 4)
+        function executarEfeitoEmbaralhar(aoTerminar) {
+            const resultadoEl = document.getElementById('resultado');
+            let rodadas = 0;
+            const maxRodadas = 15;
+
+            let embaralharIntervalo = setInterval(() => {
+                const idxAleatorio = Math.floor(Math.random() * participantesDisponiveis.length);
+                const tempParticipante = participantesDisponiveis[idxAleatorio];
+
+                resultadoEl.innerHTML = `
+                    <div class="container-sorteado">
+                        <img src="${tempParticipante.foto}" alt="Foto" class="foto-sorteado">
+                        <div class="nome-sorteado">${tempParticipante.nome}</div>
+                    </div>
+                `;
+
+                rodadas++;
+                if (rodadas >= maxRodadas) {
+                    clearInterval(embaralharIntervalo);
+                    realizarSorteioReal(aoTerminar);
+                }
+            }, 80);
+        }
+
         function realizarSorteioReal(aoTerminar) {
             const indiceSorteado = Math.floor(Math.random() * participantesDisponiveis.length);
             const participanteSorteado = participantesDisponiveis.splice(indiceSorteado, 1)[0];
             
-            // ✅ SEGURANÇA EXTRA: SE POR ACASO NÃO TIVER DADOS, INTERROMPE
             if (!participanteSorteado || !participanteSorteado.nome) {
                 emContagem = false;
                 if (aoTerminar) aoTerminar();
@@ -684,7 +707,6 @@
 
             tocarVitoria();
 
-            // ✅ EXIBIÇÃO CORRETA
             document.getElementById('resultado').innerHTML = `
                 <div class="container-sorteado">
                     <img src="${participanteSorteado.foto}" alt="Foto do sorteado" class="foto-sorteado">
@@ -740,7 +762,6 @@
             }
         }
 
-        // ✅ LISTA DE SORTEADOS CORRIGIDA
         function atualizarListaSorteados() {
             const lista = document.getElementById('listaSorteados');
             lista.innerHTML = '';
