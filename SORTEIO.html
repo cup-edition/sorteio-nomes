@@ -605,7 +605,8 @@
                 const todasInscricoes = [];
                 snapshot.forEach(item => {
                     const dados = item.val();
-                    if (dados && dados.status === 'confirmado' && dados.nome) {
+                    // ALTERAÇÃO AQUI: mudando de 'confirmado' para 'aprovado'
+                    if (dados && dados.status === 'aprovado' && dados.nome) {
                         todasInscricoes.push({
                             nome: dados.nome,
                             foto: dados.foto || 'https://via.placeholder.com/180/333/fff?text=SEM+FOTO'
