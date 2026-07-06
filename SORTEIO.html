@@ -521,7 +521,7 @@
                 </div>
 
                 <button id="sortearBtn" onclick="iniciarSorteioAutomatico()">SORTEAR TODOS</button>
-                <button onclick="reiniciarSorteio()" class="btn-vermelho">Reiniciar Tudo</button>
+                <button onclick="reiniciarSorteio()" class="btn-vermelho" id="btnReiniciar">Reiniciar Tudo</button>
             </div>
 
             <div class="resultado" id="resultado">
@@ -642,18 +642,82 @@
                 });
 
                 listaOriginal = todasInscricoes.sort((a, b) => a.nome.localeCompare(b.nome));
-                participantesDisponiveis = [...listaOriginal];
-
-                atualizarCaixaNomes();
-                document.getElementById('totalNomes').textContent = listaOriginal.length;
-                document.getElementById('sortearBtn').disabled = (listaOriginal.length === 0);
+                
+                // Carregar sorteios salvos antes de definir participantesDisponiveis
+                carregarSorteiosSalvos(() => {
+                    atualizarCaixaNomes();
+                    document.getElementById('totalNomes').textContent = listaOriginal.length;
+                    document.getElementById('sortearBtn').disabled = (listaOriginal.length === 0);
+                });
             });
             
+            // Evento para tecla Espaço - Sorteio
             document.addEventListener('keydown', function(event) {
-                if ((event.code === 'Space' || event.key === ' ') && participantesDisponiveis.length > 0 && !emContagem) {
+                if (event.key === ' ' || event.code === 'Space') {
+                    // Impede o scroll da página
                     event.preventDefault();
-                    iniciarSorteioAutomatico();
+                    if (participantesDisponiveis.length > 0 && !emContagem) {
+                        iniciarSorteioAutomatico();
+                    }
                 }
+            });
+            
+            // Evento para tecla ESC - Reiniciar
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape' || event.keyCode === 27) {
+                    // Impede comportamento padrão do ESC
+                    event.preventDefault();
+                    reiniciarSorteio();
+                }
+            });
+        }
+
+        function carregarSorteiosSalvos(callback) {
+            db.ref('sorteios').once('value', function(snapshot) {
+                const dados = snapshot.val();
+                if (dados && dados.sorteados && Array.isArray(dados.sorteados)) {
+                    sorteados = dados.sorteados;
+                    // Remover os sorteados dos participantes disponíveis
+                    const nomesSorteados = new Set(sorteados.map(p => p.nome));
+                    participantesDisponiveis = listaOriginal.filter(p => !nomesSorteados.has(p.nome));
+                    
+                    // Preencher a tabela com os sorteados
+                    sorteados.forEach((participante, index) => {
+                        const posicao = index + 1;
+                        preencherCelula(posicao, participante.nome);
+                    });
+                    
+                    atualizarListaSorteados();
+                    
+                    // Verificar se todos foram sorteados
+                    if (participantesDisponiveis.length === 0 && sorteados.length > 0) {
+                        document.getElementById('mensagemFinal').style.display = 'flex';
+                    }
+                } else {
+                    participantesDisponiveis = [...listaOriginal];
+                    sorteados = [];
+                }
+                if (callback) callback();
+            }).catch(erro => {
+                console.error("Erro ao carregar sorteios:", erro);
+                participantesDisponiveis = [...listaOriginal];
+                sorteados = [];
+                if (callback) callback();
+            });
+        }
+
+        function salvarSorteiosNoBanco() {
+            db.ref('sorteios').set({
+                sorteados: sorteados,
+                ultimaAtualizacao: new Date().toISOString()
+            }).catch(erro => {
+                console.error("Erro ao salvar sorteios:", erro);
+            });
+        }
+
+        function deletarSorteiosDoBanco() {
+            db.ref('sorteios').remove().catch(erro => {
+                console.error("Erro ao deletar sorteios:", erro);
             });
         }
 
@@ -754,6 +818,9 @@
             }
 
             sorteados.push(participanteSorteado);
+            
+            // Salvar no banco após cada sorteio
+            salvarSorteiosNoBanco();
 
             preencherCelula(sorteados.length, participanteSorteado.nome);
             enviarParaPlanilha(sorteados.length, participanteSorteado.nome);
@@ -780,17 +847,16 @@
 
         function preencherCelula(posicao, nome) {
             const totalNomes = listaOriginal.length;
-            let numTimes = 4; // padrão
+            let numTimes = 4;
             
-            // Define quantos times usar baseado na quantidade de nomes
             if (totalNomes <= 4) {
-                numTimes = 1; // só time 1
+                numTimes = 1;
             } else if (totalNomes <= 8) {
-                numTimes = 2; // times 1 e 2
+                numTimes = 2;
             } else if (totalNomes <= 12) {
-                numTimes = 3; // times 1, 2 e 3
+                numTimes = 3;
             } else {
-                numTimes = 4; // todos os times
+                numTimes = 4;
             }
             
             const colunas = ['b', 'c', 'd', 'e']; 
@@ -858,9 +924,25 @@
         }
 
         function reiniciarSorteio() {
+            // Verifica se há algo para reiniciar
+            if (sorteados.length === 0 && participantesDisponiveis.length === listaOriginal.length) {
+                // Se já está reiniciado, não faz nada
+                return;
+            }
+
+            // Confirmação antes de reiniciar
+            if (sorteados.length > 0) {
+                if (!confirm('⚠️ Tem certeza que deseja reiniciar todos os sorteios?\nIsso apagará todos os nomes sorteados permanentemente.')) {
+                    return;
+                }
+            }
+
             if (intervaloAutomatico) clearTimeout(intervaloAutomatico);
             if (contagemIntervalo) clearInterval(contagemIntervalo);
             emContagem = false;
+
+            // Deletar os sorteios do banco
+            deletarSorteiosDoBanco();
 
             participantesDisponiveis = [...listaOriginal];
             sorteados = [];
@@ -873,6 +955,13 @@
             document.getElementById('listaSorteados').innerHTML = '';
             document.getElementById('mensagemFinal').style.display = 'none';
             document.getElementById('sortearBtn').disabled = (listaOriginal.length === 0);
+            
+            // Feedback visual do reinício
+            const btnReiniciar = document.getElementById('btnReiniciar');
+            btnReiniciar.textContent = '✅ Reiniciado!';
+            setTimeout(() => {
+                btnReiniciar.textContent = 'Reiniciar Tudo';
+            }, 2000);
         }
     </script>
 </body>
