@@ -779,19 +779,46 @@
         }
 
         function preencherCelula(posicao, nome) {
+            const totalNomes = listaOriginal.length;
+            let numTimes = 4; // padrão
+            
+            // Define quantos times usar baseado na quantidade de nomes
+            if (totalNomes <= 4) {
+                numTimes = 1; // só time 1
+            } else if (totalNomes <= 8) {
+                numTimes = 2; // times 1 e 2
+            } else if (totalNomes <= 12) {
+                numTimes = 3; // times 1, 2 e 3
+            } else {
+                numTimes = 4; // todos os times
+            }
+            
             const colunas = ['b', 'c', 'd', 'e']; 
             const linhaInicial = 14;
-            const indiceColuna = (posicao - 1) % 4;
-            const indiceLinha = linhaInicial + Math.floor((posicao - 1) / 4);
+            const indiceColuna = (posicao - 1) % numTimes;
+            const indiceLinha = linhaInicial + Math.floor((posicao - 1) / numTimes);
             const idCelula = colunas[indiceColuna] + indiceLinha;
             document.getElementById(idCelula).textContent = nome;
         }
 
         function enviarParaPlanilha(posicao, nome) {
+            const totalNomes = listaOriginal.length;
+            let numTimes = 4;
+            
+            if (totalNomes <= 4) {
+                numTimes = 1;
+            } else if (totalNomes <= 8) {
+                numTimes = 2;
+            } else if (totalNomes <= 12) {
+                numTimes = 3;
+            } else {
+                numTimes = 4;
+            }
+            
             const colunas = ['B', 'C', 'D', 'E']; 
             const linhaInicial = 14;
-            const indiceColuna = (posicao - 1) % 4;
-            const indiceLinha = linhaInicial + Math.floor((posicao - 1) / 4);
+            const indiceColuna = (posicao - 1) % numTimes;
+            const indiceLinha = linhaInicial + Math.floor((posicao - 1) / numTimes);
             const celula = colunas[indiceColuna] + indiceLinha;
 
             fetch(`${LINK_API_GOOGLE}?celula=${celula}&nome=${encodeURIComponent(nome)}`)
