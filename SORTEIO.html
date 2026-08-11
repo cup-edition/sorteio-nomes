@@ -61,6 +61,53 @@
             text-transform: uppercase;
         }
 
+        .label-nomes-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .label-nomes-row label {
+            margin-bottom: 0;
+        }
+
+        .switch-toggle {
+            width: 46px;
+            height: 26px;
+            padding: 0;
+            border-radius: 20px;
+            background-color: #6c757d;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            flex-shrink: 0;
+            transition: background-color 0.3s;
+        }
+        .switch-toggle:hover {
+            background-color: #5a6268;
+        }
+        .switch-toggle .switch-ponteiro {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #ffffff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+            transition: left 0.3s ease;
+        }
+        .switch-toggle.ativado {
+            background-color: #27ae60;
+            box-shadow: 0 0 8px rgba(39, 174, 96, 0.6);
+        }
+        .switch-toggle.ativado:hover {
+            background-color: #219653;
+        }
+        .switch-toggle.ativado .switch-ponteiro {
+            left: 23px;
+        }
+
         .contador-nomes {
             font-size: 14px;
             color: #ced4da;
@@ -505,7 +552,12 @@
             <div class="aviso-atualizacao">🔄 Lista updated automaticamente com os inscritos confirmados</div>
         
             <div class="input-area">
-                <label for="nomes">📋 NOMES DOS APROVADOS:</label>
+                <div class="label-nomes-row">
+                    <label for="nomes">📋 NOMES DOS APROVADOS:</label>
+                    <button type="button" id="btnAlternarNomes" class="switch-toggle" onclick="alternarMostrarConfirmados()" title="Mostrar nomes dos confirmados" role="switch" aria-checked="false">
+                        <span class="switch-ponteiro"></span>
+                    </button>
+                </div>
                 <div class="caixa-nomes" id="caixaNomes">
                     <div class="coluna" id="coluna1"></div>
                     <div class="coluna" id="coluna2"></div>
@@ -551,6 +603,8 @@
         var db = firebase.database();
 
         let listaOriginal = [];
+        let todasInscricoes = [];
+        let mostrarConfirmados = false;
         let participantesDisponiveis = [];
         let sorteados = [];
         let emContagem = false;
@@ -630,25 +684,21 @@
 
         function iniciarSistema() {
             db.ref('inscricoes').on('value', function(snapshot) {
-                const todasInscricoes = [];
+                const todas = [];
                 snapshot.forEach(item => {
                     const dados = item.val();
-                    if (dados && dados.status === 'aprovado' && dados.nome) {
-                        todasInscricoes.push({
+                    if (dados && dados.nome && (dados.status === 'aprovado' || dados.status === 'confirmado')) {
+                        todas.push({
                             nome: dados.nome,
-                            foto: dados.foto || 'https://via.placeholder.com/180/333/fff?text=SEM+FOTO'
+                            foto: dados.foto || 'https://via.placeholder.com/180/333/fff?text=SEM+FOTO',
+                            status: dados.status
                         });
                     }
                 });
 
-                listaOriginal = todasInscricoes.sort((a, b) => a.nome.localeCompare(b.nome));
-                
-                // Carregar sorteios salvos antes de definir participantesDisponiveis
-                carregarSorteiosSalvos(() => {
-                    atualizarCaixaNomes();
-                    document.getElementById('totalNomes').textContent = listaOriginal.length;
-                    document.getElementById('sortearBtn').disabled = (listaOriginal.length === 0);
-                });
+                todasInscricoes = todas;
+
+                aplicarFiltroNomes();
             });
             
             // Evento para tecla Espaço - Sorteio
@@ -670,6 +720,30 @@
                     reiniciarSorteio();
                 }
             });
+        }
+
+        function aplicarFiltroNomes() {
+            const statusAlvo = mostrarConfirmados ? 'confirmado' : 'aprovado';
+
+            listaOriginal = todasInscricoes
+                .filter(p => p.status === statusAlvo)
+                .sort((a, b) => a.nome.localeCompare(b.nome));
+
+            // Carregar sorteios salvos antes de definir participantesDisponiveis
+            carregarSorteiosSalvos(() => {
+                atualizarCaixaNomes();
+                document.getElementById('totalNomes').textContent = listaOriginal.length;
+                document.getElementById('sortearBtn').disabled = (listaOriginal.length === 0);
+            });
+        }
+
+        function alternarMostrarConfirmados() {
+            mostrarConfirmados = !mostrarConfirmados;
+            const btn = document.getElementById('btnAlternarNomes');
+            btn.classList.toggle('ativado', mostrarConfirmados);
+            btn.setAttribute('aria-checked', mostrarConfirmados ? 'true' : 'false');
+            document.querySelector('.label-nomes-row label').textContent = mostrarConfirmados ? '📋 NOMES DOS CONFIRMADOS:' : '📋 NOMES DOS APROVADOS:';
+            aplicarFiltroNomes();
         }
 
         function carregarSorteiosSalvos(callback) {
