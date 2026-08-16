@@ -601,6 +601,34 @@
 
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         var db = firebase.database();
+        var fdb = firebase.firestore();
+        const SORTEIO_TIMES_NOMES = ['BARCELONA', 'REAL MADRID', 'PSG', 'LIVERPOOL'];
+
+        function vincularJogadorNoFirestore(nome, indiceColuna) {
+            if (!nome) return;
+            const nomeTime = SORTEIO_TIMES_NOMES[indiceColuna];
+            if (!nomeTime) return;
+            fdb.collection('times').where('nome', '==', nomeTime).get()
+                .then(snapTimes => {
+                    if (snapTimes.empty) { console.warn('Time não encontrado:', nomeTime); return null; }
+                    const timeId = snapTimes.docs[0].id;
+                    return fdb.collection('jogadores').where('nome', '==', nome).get().then(snapJog => {
+                        if (snapJog.empty) { console.warn('Jogador não encontrado:', nome); return null; }
+                        const jogadorDoc = snapJog.docs[0];
+                        const jogadorAtual = jogadorDoc.data();
+                        if (jogadorAtual.timeId && jogadorAtual.timeId !== timeId) {
+                            console.warn('Jogador já vinculado a outro time, preservando:', nome);
+                            return null;
+                        }
+                        return fdb.collection('jogadores').doc(jogadorDoc.id).update({
+                            timeId: timeId,
+                            vinculadoEm: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    });
+                })
+                .then(() => console.log('Vinculado:', nome, '→', nomeTime))
+                .catch(err => console.error('Erro ao vincular no Firestore:', err));
+        }
 
         let listaOriginal = [];
         let todasInscricoes = [];
@@ -939,6 +967,7 @@
             const indiceLinha = linhaInicial + Math.floor((posicao - 1) / numTimes);
             const idCelula = colunas[indiceColuna] + indiceLinha;
             document.getElementById(idCelula).textContent = nome;
+            vincularJogadorNoFirestore(nome, indiceColuna);
         }
 
         function enviarParaPlanilha(posicao, nome) {
